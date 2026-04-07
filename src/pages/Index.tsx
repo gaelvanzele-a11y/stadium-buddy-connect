@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Zap, Briefcase, Bike, Leaf, ChevronRight } from "lucide-react";
+import { Search, Zap, Briefcase, Bike, Leaf } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LanguageToggle from "@/components/LanguageToggle";
+import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import RoomListView from "@/components/RoomListView";
 import RoomDetailView from "@/components/RoomDetailView";
@@ -10,6 +10,7 @@ import BookingConfirmView from "@/components/BookingConfirmView";
 import BookingSuccessView from "@/components/BookingSuccessView";
 import ParkingMobilityView from "@/components/ParkingMobilityView";
 import EnergySharingView from "@/components/EnergySharingView";
+import AccountView from "@/components/AccountView";
 
 export type AppView =
   | { type: "home" }
@@ -18,16 +19,23 @@ export type AppView =
   | { type: "bookingConfirm"; roomId: string }
   | { type: "bookingSuccess"; roomId: string }
   | { type: "mobility" }
-  | { type: "energy" };
+  | { type: "energy" }
+  | { type: "account" };
 
 const Index = () => {
   const { t } = useLanguage();
   const [view, setView] = useState<AppView>({ type: "home" });
   const [bottomTab, setBottomTab] = useState("home");
 
+  const goHome = () => {
+    setView({ type: "home" });
+    setBottomTab("home");
+  };
+
   const handleBottomTab = (tab: string) => {
     setBottomTab(tab);
     if (tab === "home") setView({ type: "home" });
+    if (tab === "account") setView({ type: "account" });
   };
 
   const categories = [
@@ -57,17 +65,19 @@ const Index = () => {
   const renderView = () => {
     switch (view.type) {
       case "rooms":
-        return <RoomListView onBack={() => setView({ type: "home" })} onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })} />;
+        return <RoomListView onBack={goHome} onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })} />;
       case "roomDetail":
         return <RoomDetailView roomId={view.roomId} onBack={() => setView({ type: "rooms" })} onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId })} />;
       case "bookingConfirm":
         return <BookingConfirmView roomId={view.roomId} onBack={() => setView({ type: "roomDetail", roomId: view.roomId })} onConfirm={() => setView({ type: "bookingSuccess", roomId: view.roomId })} />;
       case "bookingSuccess":
-        return <BookingSuccessView roomId={view.roomId} onBack={() => setView({ type: "home" })} />;
+        return <BookingSuccessView roomId={view.roomId} onBack={goHome} />;
       case "mobility":
-        return <ParkingMobilityView onBack={() => setView({ type: "home" })} />;
+        return <ParkingMobilityView onBack={goHome} />;
       case "energy":
-        return <EnergySharingView onBack={() => setView({ type: "home" })} />;
+        return <EnergySharingView onBack={goHome} />;
+      case "account":
+        return <AccountView />;
       default:
         return null;
     }
@@ -75,6 +85,9 @@ const Index = () => {
 
   return (
     <div className="mx-auto min-h-screen max-w-lg bg-background pb-20">
+      {/* TopBar with language toggle + hamburger menu on all screens */}
+      <TopBar onHomeClick={goHome} showMenu={view.type !== "home"} />
+
       <AnimatePresence mode="wait">
         {view.type === "home" ? (
           <motion.div
@@ -82,16 +95,13 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, x: -20 }}
-            className="px-5 pt-6"
+            className="px-5 pt-2"
           >
             {/* Header */}
-            <div className="mb-5 flex items-start justify-between">
-              <div>
-                <h1 className="font-display text-xl font-extrabold text-accent leading-tight">
-                  {t("welcome")}
-                </h1>
-              </div>
-              <LanguageToggle />
+            <div className="mb-5">
+              <h1 className="font-display text-xl font-extrabold text-accent leading-tight">
+                {t("welcome")}
+              </h1>
             </div>
 
             {/* Search */}

@@ -3,30 +3,31 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 
-const parkingZones = [
-  { zone: "North Gate", total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
-  { zone: "East Wing", total: 250, occupied: 98, evChargers: 8, evAvailable: 6 },
-  { zone: "South Gate", total: 350, occupied: 340, evChargers: 10, evAvailable: 1 },
-  { zone: "West VIP", total: 80, occupied: 22, evChargers: 6, evAvailable: 5 },
-];
-
-const bikes = [
-  { id: "E-01", battery: 92, location: "North Gate", status: "available" as const },
-  { id: "E-02", battery: 78, location: "East Wing", status: "available" as const },
-  { id: "E-03", battery: 45, location: "South Gate", status: "in-use" as const },
-  { id: "E-04", battery: 100, location: "West VIP", status: "available" as const },
-  { id: "E-05", battery: 15, location: "North Gate", status: "charging" as const },
-  { id: "E-06", battery: 63, location: "East Wing", status: "available" as const },
-];
-
 const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
   const { t } = useLanguage();
+
+  const parkingZones = [
+    { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
+    { zoneKey: "eastWing" as const, total: 250, occupied: 98, evChargers: 8, evAvailable: 6 },
+    { zoneKey: "southGate" as const, total: 350, occupied: 340, evChargers: 10, evAvailable: 1 },
+    { zoneKey: "westVIP" as const, total: 80, occupied: 22, evChargers: 6, evAvailable: 5 },
+  ];
+
+  const bikes = [
+    { id: "E-01", battery: 92, locationKey: "northGate" as const, status: "available" as const },
+    { id: "E-02", battery: 78, locationKey: "eastWing" as const, status: "available" as const },
+    { id: "E-03", battery: 45, locationKey: "southGate" as const, status: "in-use" as const },
+    { id: "E-04", battery: 100, locationKey: "westVIP" as const, status: "available" as const },
+    { id: "E-05", battery: 15, locationKey: "northGate" as const, status: "charging" as const },
+    { id: "E-06", battery: 63, locationKey: "eastWing" as const, status: "available" as const },
+  ];
+
   const totalSpaces = parkingZones.reduce((a, z) => a + z.total, 0);
   const totalOccupied = parkingZones.reduce((a, z) => a + z.occupied, 0);
   const totalFree = totalSpaces - totalOccupied;
 
   return (
-    <div className="px-5 pb-24 pt-6">
+    <div className="px-5 pb-24 pt-2">
       <button onClick={onBack} className="mb-4 text-muted-foreground">
         <ArrowLeft className="h-5 w-5" />
       </button>
@@ -35,21 +36,19 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
         {t("sharedMobility")}
       </h2>
 
-      {/* Summary */}
       <div className="mb-5 rounded-xl bg-card p-5 card-shadow">
         <p className="text-sm text-muted-foreground">{t("parkingSpaces")}</p>
         <p className="font-display text-4xl font-extrabold text-mobility-blue">{totalFree}</p>
         <Progress value={(totalOccupied / totalSpaces) * 100} className="mt-3 h-2 bg-secondary [&>div]:bg-mobility-blue" />
       </div>
 
-      {/* Zones */}
       <div className="mb-6 space-y-3">
         {parkingZones.map((zone, i) => {
           const free = zone.total - zone.occupied;
           const pct = (zone.occupied / zone.total) * 100;
           return (
             <motion.div
-              key={zone.zone}
+              key={zone.zoneKey}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
@@ -58,7 +57,7 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-mobility-blue" />
-                  <span className="font-display text-sm font-bold text-foreground">{zone.zone}</span>
+                  <span className="font-display text-sm font-bold text-foreground">{t(zone.zoneKey)}</span>
                 </div>
                 <span className={`font-display text-lg font-extrabold ${free < 20 ? "text-destructive" : "text-primary"}`}>
                   {free}
@@ -73,7 +72,6 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
         })}
       </div>
 
-      {/* E-Bikes */}
       <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
         <Bike className="h-4 w-4 text-primary" /> {t("eBikes")}
       </h3>
@@ -91,8 +89,8 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
                 <Bike className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">Bike {bike.id}</p>
-                <p className="text-[11px] text-muted-foreground">{bike.location}</p>
+                <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
+                <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
               </div>
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -105,7 +103,7 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
                   {t("rent")}
                 </button>
               ) : (
-                <span className="text-[11px] text-muted-foreground capitalize">{bike.status}</span>
+                <span className="text-[11px] text-muted-foreground">{bike.status === "in-use" ? t("inUse") : t("charging")}</span>
               )}
             </div>
           </motion.div>
