@@ -3,16 +3,17 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 
-const neighbours = [
-  { name: "Community Center", distance: "0.3 km", allocation: 18, active: true },
-  { name: "Local School", distance: "0.5 km", allocation: 25, active: true },
-  { name: "Residential Block A", distance: "0.2 km", allocation: 30, active: true },
-  { name: "Sports Clinic", distance: "0.4 km", allocation: 12, active: false },
-  { name: "Café District", distance: "0.6 km", allocation: 15, active: true },
-];
-
 const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
   const { t } = useLanguage();
+
+  const neighbours = [
+    { nameKey: "communityCenter" as const, distance: "0.3 km", allocation: 18, active: true },
+    { nameKey: "localSchool" as const, distance: "0.5 km", allocation: 25, active: true },
+    { nameKey: "residentialBlockA" as const, distance: "0.2 km", allocation: 30, active: true },
+    { nameKey: "sportsClinic" as const, distance: "0.4 km", allocation: 12, active: false },
+    { nameKey: "cafeDistrict" as const, distance: "0.6 km", allocation: 15, active: true },
+  ];
+
   const solarOutput = 142;
   const solarCapacity = 200;
   const stadiumUsage = 38;
@@ -20,7 +21,7 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
   const sharedEnergy = neighbours.filter((n) => n.active).reduce((a, n) => a + n.allocation, 0);
 
   return (
-    <div className="px-5 pb-24 pt-6">
+    <div className="px-5 pb-24 pt-2">
       <button onClick={onBack} className="mb-4 text-muted-foreground">
         <ArrowLeft className="h-5 w-5" />
       </button>
@@ -29,7 +30,6 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
         {t("neighborhoodEnergy")}
       </h2>
 
-      {/* Stats */}
       <div className="mb-5 grid grid-cols-2 gap-3">
         {[
           { label: t("solarOutput"), value: `${solarOutput} kW`, pct: (solarOutput / solarCapacity) * 100, icon: Sun },
@@ -52,7 +52,6 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
         ))}
       </div>
 
-      {/* Surplus */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -72,14 +71,13 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
         </div>
       </motion.div>
 
-      {/* Neighbours */}
       <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
         <Home className="h-4 w-4 text-energy-leaf" /> {t("localNeighbours")}
       </h3>
       <div className="space-y-2">
         {neighbours.map((n, i) => (
           <motion.div
-            key={n.name}
+            key={n.nameKey}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 + i * 0.05 }}
@@ -88,7 +86,7 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
             <div className="flex items-center gap-3">
               <div className={`h-2 w-2 rounded-full ${n.active ? "bg-energy-leaf" : "bg-muted-foreground"}`} />
               <div>
-                <p className="text-sm font-medium text-foreground">{n.name}</p>
+                <p className="text-sm font-medium text-foreground">{t(n.nameKey)}</p>
                 <p className="text-[11px] text-muted-foreground">{n.distance}</p>
               </div>
             </div>
