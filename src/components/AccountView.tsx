@@ -1,22 +1,35 @@
 import { useState } from "react";
-import { User, Mail, Lock, LogIn, LogOut } from "lucide-react";
+import { User, Lock, LogIn, LogOut, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const AccountView = () => {
+interface AccountViewProps {
+  onGovernanceLogin?: () => void;
+}
+
+const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
   const { t } = useLanguage();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
+    setError("");
+    if (username === "hubmanager" && password === "1234") {
       setIsLoggedIn(true);
+      onGovernanceLogin?.();
+      return;
     }
+    if (username && password) {
+      setIsLoggedIn(true);
+      return;
+    }
+    setError(t("invalidCredentials"));
   };
 
-  if (isLoggedIn) {
+  if (isLoggedIn && username !== "hubmanager") {
     return (
       <div className="px-5 pb-24 pt-6">
         <h2 className="mb-5 font-display text-lg font-extrabold text-accent uppercase">
@@ -33,14 +46,14 @@ const AccountView = () => {
               <User className="h-7 w-7 text-primary" />
             </div>
             <div>
-              <p className="font-display text-base font-bold text-foreground">{email}</p>
+              <p className="font-display text-base font-bold text-foreground">{username}</p>
               <p className="text-xs text-muted-foreground">{t("loggedIn")}</p>
             </div>
           </div>
         </motion.div>
 
         <button
-          onClick={() => { setIsLoggedIn(false); setEmail(""); setPassword(""); }}
+          onClick={() => { setIsLoggedIn(false); setUsername(""); setPassword(""); }}
           className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-destructive"
         >
           <LogOut className="h-4 w-4" />
@@ -64,14 +77,14 @@ const AccountView = () => {
       >
         <div className="rounded-xl bg-card p-5 card-shadow space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">{t("email")}</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">{t("username")}</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("emailPlaceholder")}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder={t("usernamePlaceholder")}
                 className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 required
               />
@@ -92,6 +105,8 @@ const AccountView = () => {
               />
             </div>
           </div>
+
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
 
         <button
@@ -101,6 +116,11 @@ const AccountView = () => {
           <LogIn className="h-4 w-4" />
           {t("login")}
         </button>
+
+        <div className="flex items-center gap-2 rounded-lg bg-secondary/50 p-3 text-[11px] text-muted-foreground">
+          <Shield className="h-4 w-4 flex-shrink-0" />
+          <span>Hub Manager? Log in with credentials for the governance dashboard.</span>
+        </div>
       </motion.form>
     </div>
   );

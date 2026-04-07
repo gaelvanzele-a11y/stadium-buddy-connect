@@ -4,6 +4,7 @@ import { Search, Zap, Briefcase, Bike, Leaf } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
+import MenuOverlay from "@/components/MenuOverlay";
 import RoomListView from "@/components/RoomListView";
 import RoomDetailView from "@/components/RoomDetailView";
 import BookingConfirmView from "@/components/BookingConfirmView";
@@ -11,21 +12,32 @@ import BookingSuccessView from "@/components/BookingSuccessView";
 import ParkingMobilityView from "@/components/ParkingMobilityView";
 import EnergySharingView from "@/components/EnergySharingView";
 import AccountView from "@/components/AccountView";
+import SearchView from "@/components/SearchView";
+import BookingsView, { type Booking } from "@/components/BookingsView";
+import CommunityFeedbackView from "@/components/CommunityFeedbackView";
+import GovernanceDashboard from "@/components/GovernanceDashboard";
+import { rooms } from "@/data/rooms";
 
 export type AppView =
   | { type: "home" }
+  | { type: "search" }
+  | { type: "bookingsList" }
   | { type: "rooms" }
   | { type: "roomDetail"; roomId: string }
   | { type: "bookingConfirm"; roomId: string }
   | { type: "bookingSuccess"; roomId: string }
   | { type: "mobility" }
   | { type: "energy" }
-  | { type: "account" };
+  | { type: "account" }
+  | { type: "feedback" }
+  | { type: "governance" };
 
 const Index = () => {
   const { t } = useLanguage();
   const [view, setView] = useState<AppView>({ type: "home" });
   const [bottomTab, setBottomTab] = useState("home");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
 
   const goHome = () => {
     setView({ type: "home" });
@@ -35,7 +47,37 @@ const Index = () => {
   const handleBottomTab = (tab: string) => {
     setBottomTab(tab);
     if (tab === "home") setView({ type: "home" });
+    if (tab === "search") setView({ type: "search" });
+    if (tab === "bookings") setView({ type: "bookingsList" });
     if (tab === "account") setView({ type: "account" });
+    if (tab === "feedback") setView({ type: "feedback" });
+  };
+
+  const handleMenuNavigate = (target: string) => {
+    if (target === "home") { goHome(); return; }
+    if (target === "rooms") { setView({ type: "rooms" }); setBottomTab(""); return; }
+    if (target === "mobility") { setView({ type: "mobility" }); setBottomTab(""); return; }
+    if (target === "energy") { setView({ type: "energy" }); setBottomTab(""); return; }
+    if (target === "feedback") { setView({ type: "feedback" }); setBottomTab("feedback"); return; }
+  };
+
+  const handleBookingSuccess = (roomId: string) => {
+    const room = rooms.find((r) => r.id === roomId);
+    if (room) {
+      const newBooking: Booking = {
+        id: Date.now().toString(),
+        roomName: room.name,
+        date: "15 Oct 2026",
+        time: "14:00 - 16:00",
+        location: t("stadiumEntrance"),
+      };
+      setBookings((prev) => [newBooking, ...prev]);
+    }
+    setView({ type: "bookingSuccess", roomId });
+  };
+
+  const handleGovernanceLogin = () => {
+    setView({ type: "governance" });
   };
 
   const categories = [
@@ -64,12 +106,22 @@ const Index = () => {
 
   const renderView = () => {
     switch (view.type) {
+      case "search":
+        return (
+          <SearchView
+            onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })}
+            onGoMobility={() => setView({ type: "mobility" })}
+            onGoEnergy={() => setView({ type: "energy" })}
+          />
+        );
+      case "bookingsList":
+        return <BookingsView bookings={bookings} />;
       case "rooms":
         return <RoomListView onBack={goHome} onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })} />;
       case "roomDetail":
         return <RoomDetailView roomId={view.roomId} onBack={() => setView({ type: "rooms" })} onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId })} />;
       case "bookingConfirm":
-        return <BookingConfirmView roomId={view.roomId} onBack={() => setView({ type: "roomDetail", roomId: view.roomId })} onConfirm={() => setView({ type: "bookingSuccess", roomId: view.roomId })} />;
+        return <BookingConfirmView roomId={view.roomId} onBack={() => setView({ type: "roomDetail", roomId: view.roomId })} onConfirm={() => handleBookingSuccess(view.roomId)} />;
       case "bookingSuccess":
         return <BookingSuccessView roomId={view.roomId} onBack={goHome} />;
       case "mobility":
@@ -77,7 +129,11 @@ const Index = () => {
       case "energy":
         return <EnergySharingView onBack={goHome} />;
       case "account":
-        return <AccountView />;
+        return <AccountView onGovernanceLogin={handleGovernanceLogin} />;
+      case "feedback":
+        return <CommunityFeedbackView />;
+      case "governance":
+        return <GovernanceDashboard />;
       default:
         return null;
     }
@@ -85,8 +141,8 @@ const Index = () => {
 
   return (
     <div className="mx-auto min-h-screen max-w-lg bg-background pb-20">
-      {/* TopBar with language toggle + hamburger menu on all screens */}
-      <TopBar onHomeClick={goHome} showMenu={view.type !== "home"} />
+      <TopBar onHomeClick={() => setMenuOpen(true)} showMenu={view.type !== "home"} />
+      <MenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={handleMenuNavigate} />
 
       <AnimatePresence mode="wait">
         {view.type === "home" ? (
@@ -97,24 +153,22 @@ const Index = () => {
             exit={{ opacity: 0, x: -20 }}
             className="px-5 pt-2"
           >
-            {/* Header */}
             <div className="mb-5">
               <h1 className="font-display text-xl font-extrabold text-accent leading-tight">
                 {t("welcome")}
               </h1>
             </div>
 
-            {/* Search */}
             <div className="relative mb-6">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={t("searchPlaceholder")}
                 className="w-full rounded-lg border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                onFocus={() => { setView({ type: "search" }); setBottomTab("search"); }}
               />
             </div>
 
-            {/* Categories */}
             <div className="mb-6 space-y-3">
               {categories.map((cat, i) => {
                 const Icon = cat.icon;
@@ -140,7 +194,6 @@ const Index = () => {
               })}
             </div>
 
-            {/* Energy savings banner */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
