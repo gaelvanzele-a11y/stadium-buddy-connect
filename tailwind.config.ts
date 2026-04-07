@@ -7,14 +7,14 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
       fontFamily: {
-        display: ["Space Grotesk", "sans-serif"],
+        display: ["Plus Jakarta Sans", "sans-serif"],
         body: ["Inter", "sans-serif"],
       },
       colors: {
@@ -52,14 +52,15 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         stadium: {
-          glow: "hsl(var(--stadium-glow))",
+          navy: "hsl(var(--stadium-navy))",
+          green: "hsl(var(--stadium-green))",
         },
         energy: {
-          DEFAULT: "hsl(var(--energy))",
-          amber: "hsl(var(--energy-amber))",
+          green: "hsl(var(--energy-green))",
+          leaf: "hsl(var(--energy-leaf))",
         },
-        parking: {
-          blue: "hsl(var(--parking-blue))",
+        mobility: {
+          blue: "hsl(var(--mobility-blue))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -74,8 +75,8 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
       },
       keyframes: {
         "accordion-down": {
@@ -86,15 +87,10 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "pulse-glow": {
-          "0%, 100%": { opacity: "0.6" },
-          "50%": { opacity: "1" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },
