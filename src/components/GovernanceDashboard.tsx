@@ -1,4 +1,4 @@
-import { BarChart3, Users, Zap, Car, TrendingUp, Activity, Calendar, MessageSquare } from "lucide-react";
+import { Users, Zap, Car, Activity, Calendar, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
