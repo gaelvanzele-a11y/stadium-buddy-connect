@@ -1,0 +1,70 @@
+import { CheckCircle2, Calendar, Clock, QrCode } from "lucide-react";
+import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { rooms } from "@/data/rooms";
+
+interface BookingSuccessViewProps {
+  roomId: string;
+  onBack: () => void;
+}
+
+const BookingSuccessView = ({ roomId, onBack }: BookingSuccessViewProps) => {
+  const { t } = useLanguage();
+  const room = rooms.find((r) => r.id === roomId);
+  if (!room) return null;
+
+  return (
+    <div className="flex flex-col items-center px-5 pb-24 pt-10 text-center">
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      >
+        <CheckCircle2 className="h-16 w-16 text-primary" />
+      </motion.div>
+
+      <h2 className="mt-4 font-display text-lg font-extrabold text-accent">
+        {t("bookingConfirmed")}
+      </h2>
+
+      <div className="mt-4 w-full rounded-xl border border-border bg-card p-4 card-shadow text-left">
+        <div className="flex items-center gap-3 mb-1">
+          <Calendar className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">15 Oct, 14:00-16:00</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">2 {t("hours")} - €{room.pricePerHour * 2}</span>
+        </div>
+      </div>
+
+      {/* Digital Key / QR */}
+      <div className="mt-5 w-full rounded-xl border border-border bg-card p-5 card-shadow">
+        <p className="mb-1 font-display text-sm font-bold text-foreground">{t("digitalKey")}</p>
+        <p className="mb-4 text-xs text-muted-foreground">{t("scanAtEntrance")} QR code</p>
+        <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-xl border-2 border-dashed border-border bg-secondary">
+          <QrCode className="h-16 w-16 text-foreground" />
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">{t("scanAtEntrance")} C</p>
+      </div>
+
+      <div className="mt-5 w-full space-y-3">
+        <button className="w-full rounded-xl bg-accent py-3 font-display text-sm font-bold text-accent-foreground">
+          {t("openSmartLock")}
+        </button>
+        <button className="w-full rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground">
+          {t("routeDescription")}
+        </button>
+        <button className="w-full rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground">
+          {t("reserveSharedCar")}
+        </button>
+      </div>
+
+      <button onClick={onBack} className="mt-4 text-sm text-primary font-medium">
+        {t("backToHome")}
+      </button>
+    </div>
+  );
+};
+
+export default BookingSuccessView;

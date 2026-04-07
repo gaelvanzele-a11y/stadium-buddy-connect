@@ -1,72 +1,168 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DoorOpen, ParkingCircle, Sun } from "lucide-react";
-import StadiumHeader from "@/components/StadiumHeader";
-import RoomRental from "@/components/RoomRental";
-import ParkingMobility from "@/components/ParkingMobility";
-import EnergySharing from "@/components/EnergySharing";
+import { Search, Zap, Briefcase, Bike, Leaf, ChevronRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageToggle from "@/components/LanguageToggle";
+import BottomNav from "@/components/BottomNav";
+import RoomListView from "@/components/RoomListView";
+import RoomDetailView from "@/components/RoomDetailView";
+import BookingConfirmView from "@/components/BookingConfirmView";
+import BookingSuccessView from "@/components/BookingSuccessView";
+import ParkingMobilityView from "@/components/ParkingMobilityView";
+import EnergySharingView from "@/components/EnergySharingView";
 
-const tabs = [
-  { id: "rooms", label: "Rooms", icon: DoorOpen },
-  { id: "parking", label: "Parking & Mobility", icon: ParkingCircle },
-  { id: "energy", label: "Energy Sharing", icon: Sun },
-] as const;
-
-type TabId = (typeof tabs)[number]["id"];
+export type AppView =
+  | { type: "home" }
+  | { type: "rooms" }
+  | { type: "roomDetail"; roomId: string }
+  | { type: "bookingConfirm"; roomId: string }
+  | { type: "bookingSuccess"; roomId: string }
+  | { type: "mobility" }
+  | { type: "energy" };
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<TabId>("rooms");
+  const { t } = useLanguage();
+  const [view, setView] = useState<AppView>({ type: "home" });
+  const [bottomTab, setBottomTab] = useState("home");
+
+  const handleBottomTab = (tab: string) => {
+    setBottomTab(tab);
+    if (tab === "home") setView({ type: "home" });
+  };
+
+  const categories = [
+    {
+      id: "workspaces",
+      label: t("workspaces"),
+      icon: Briefcase,
+      bgClass: "bg-accent",
+      action: () => setView({ type: "rooms" }),
+    },
+    {
+      id: "mobility",
+      label: t("sharedMobility"),
+      icon: Bike,
+      bgClass: "bg-mobility-blue",
+      action: () => setView({ type: "mobility" }),
+    },
+    {
+      id: "energy",
+      label: t("neighborhoodEnergy"),
+      icon: Leaf,
+      bgClass: "bg-energy-leaf",
+      action: () => setView({ type: "energy" }),
+    },
+  ];
+
+  const renderView = () => {
+    switch (view.type) {
+      case "rooms":
+        return <RoomListView onBack={() => setView({ type: "home" })} onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })} />;
+      case "roomDetail":
+        return <RoomDetailView roomId={view.roomId} onBack={() => setView({ type: "rooms" })} onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId })} />;
+      case "bookingConfirm":
+        return <BookingConfirmView roomId={view.roomId} onBack={() => setView({ type: "roomDetail", roomId: view.roomId })} onConfirm={() => setView({ type: "bookingSuccess", roomId: view.roomId })} />;
+      case "bookingSuccess":
+        return <BookingSuccessView roomId={view.roomId} onBack={() => setView({ type: "home" })} />;
+      case "mobility":
+        return <ParkingMobilityView onBack={() => setView({ type: "home" })} />;
+      case "energy":
+        return <EnergySharingView onBack={() => setView({ type: "home" })} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <StadiumHeader />
-
-      {/* Tab Navigation */}
-      <div className="border-b border-border bg-card/50">
-        <div className="container mx-auto flex gap-1 px-6 pt-2">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 rounded-t-lg px-4 py-3 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-x-0 -bottom-px h-0.5 bg-primary"
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Content */}
-      <main className="container mx-auto px-6 py-8">
-        <AnimatePresence mode="wait">
+    <div className="mx-auto min-h-screen max-w-lg bg-background pb-20">
+      <AnimatePresence mode="wait">
+        {view.type === "home" ? (
           <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            key="home"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="px-5 pt-6"
           >
-            {activeTab === "rooms" && <RoomRental />}
-            {activeTab === "parking" && <ParkingMobility />}
-            {activeTab === "energy" && <EnergySharing />}
+            {/* Header */}
+            <div className="mb-5 flex items-start justify-between">
+              <div>
+                <h1 className="font-display text-xl font-extrabold text-accent leading-tight">
+                  {t("welcome")}
+                </h1>
+              </div>
+              <LanguageToggle />
+            </div>
+
+            {/* Search */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder={t("searchPlaceholder")}
+                className="w-full rounded-lg border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            {/* Categories */}
+            <div className="mb-6 space-y-3">
+              {categories.map((cat, i) => {
+                const Icon = cat.icon;
+                return (
+                  <motion.button
+                    key={cat.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    onClick={cat.action}
+                    className="flex w-full items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-display text-base font-bold text-foreground uppercase tracking-wide">
+                        {cat.label}
+                      </span>
+                    </div>
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${cat.bgClass}`}>
+                      <Icon className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            {/* Energy savings banner */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="rounded-xl bg-energy-leaf p-4 card-shadow"
+            >
+              <div className="flex items-center gap-3">
+                <Zap className="h-6 w-6 text-primary-foreground" />
+                <div>
+                  <p className="font-display text-sm font-bold text-primary-foreground">
+                    {t("todaySaving")}
+                  </p>
+                  <p className="font-display text-lg font-extrabold text-primary-foreground">
+                    €1.2k {t("inEnergy")}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
-        </AnimatePresence>
-      </main>
+        ) : (
+          <motion.div
+            key={view.type}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            {renderView()}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <BottomNav activeTab={bottomTab} onTabChange={handleBottomTab} />
     </div>
   );
 };
