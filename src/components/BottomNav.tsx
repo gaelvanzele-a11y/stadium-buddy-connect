@@ -1,4 +1,4 @@
-import { Home, Search, CalendarDays, User } from "lucide-react";
+import { Home, Search, CalendarDays, User, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BottomNavProps {
@@ -13,6 +13,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
     { id: "home", label: t("home"), icon: Home },
     { id: "search", label: t("search"), icon: Search },
     { id: "bookings", label: t("bookings"), icon: CalendarDays },
+    { id: "feedback", label: t("concerns"), icon: MessageSquare },
     { id: "account", label: t("account"), icon: User },
   ];
 
@@ -26,7 +27,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1.5 text-[11px] font-medium transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 text-[10px] font-medium transition-colors ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
