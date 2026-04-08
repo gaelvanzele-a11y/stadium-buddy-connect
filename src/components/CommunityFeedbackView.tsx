@@ -16,10 +16,18 @@ const CommunityFeedbackView = () => {
   const { t } = useLanguage();
   const [message, setMessage] = useState("");
   const [category, setCategory] = useState("general");
+  const [filterCategory, setFilterCategory] = useState("all");
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([
     { id: "1", author: "Jan D.", message: t("feedbackExample1"), date: "06 Apr 2026", likes: 12, category: "facilities" },
     { id: "2", author: "Lisa V.", message: t("feedbackExample2"), date: "05 Apr 2026", likes: 8, category: "energy" },
     { id: "3", author: "Mohammed A.", message: t("feedbackExample3"), date: "04 Apr 2026", likes: 5, category: "mobility" },
+    { id: "4", author: "Sophie M.", message: t("feedbackExample4"), date: "03 Apr 2026", likes: 15, category: "facilities" },
+    { id: "5", author: "Koen B.", message: t("feedbackExample5"), date: "02 Apr 2026", likes: 9, category: "facilities" },
+    { id: "6", author: "Fatima E.", message: t("feedbackExample6"), date: "01 Apr 2026", likes: 7, category: "mobility" },
+    { id: "7", author: "Dirk W.", message: t("feedbackExample7"), date: "31 Mar 2026", likes: 20, category: "energy" },
+    { id: "8", author: "Elena R.", message: t("feedbackExample8"), date: "30 Mar 2026", likes: 11, category: "safety" },
+    { id: "9", author: "Pieter V.", message: t("feedbackExample9"), date: "29 Mar 2026", likes: 6, category: "facilities" },
+    { id: "10", author: "Anna L.", message: t("feedbackExample10"), date: "28 Mar 2026", likes: 14, category: "mobility" },
   ]);
 
   const categories = [
@@ -28,6 +36,11 @@ const CommunityFeedbackView = () => {
     { id: "mobility", label: t("mobilityCategory") },
     { id: "energy", label: t("energyCategory") },
     { id: "safety", label: t("safety") },
+  ];
+
+  const filterCategories = [
+    { id: "all", label: t("allCategories") },
+    ...categories,
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -49,6 +62,10 @@ const CommunityFeedbackView = () => {
     setFeedbackList(feedbackList.map((f) => (f.id === id ? { ...f, likes: f.likes + 1 } : f)));
   };
 
+  const filteredFeedback = filterCategory === "all"
+    ? feedbackList
+    : feedbackList.filter((f) => f.category === filterCategory);
+
   return (
     <div className="px-5 pb-24 pt-6">
       <h2 className="mb-5 font-display text-lg font-extrabold text-accent uppercase">
@@ -60,7 +77,7 @@ const CommunityFeedbackView = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         onSubmit={handleSubmit}
-        className="mb-6 rounded-xl bg-card p-4 card-shadow"
+        className="mb-4 rounded-xl bg-card p-4 card-shadow"
       >
         <div className="mb-3 flex gap-2 overflow-x-auto">
           {categories.map((cat) => (
@@ -95,14 +112,31 @@ const CommunityFeedbackView = () => {
         </div>
       </motion.form>
 
+      {/* Filter bar */}
+      <div className="mb-4 flex gap-2 overflow-x-auto">
+        {filterCategories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setFilterCategory(cat.id)}
+            className={`whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+              filterCategory === cat.id
+                ? "bg-accent text-accent-foreground"
+                : "bg-secondary/60 text-muted-foreground"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
       {/* Feedback list */}
       <div className="space-y-3">
-        {feedbackList.map((item, i) => (
+        {filteredFeedback.map((item, i) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
+            transition={{ delay: i * 0.03 }}
             className="rounded-xl bg-card p-4 card-shadow"
           >
             <div className="flex items-start justify-between">

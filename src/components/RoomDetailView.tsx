@@ -1,6 +1,7 @@
 import { ArrowLeft, Wifi, Monitor, Coffee, Tv, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
+import type { TranslationKey } from "@/contexts/LanguageContext";
 
 interface RoomDetailViewProps {
   roomId: string;
@@ -13,6 +14,13 @@ const featureIcons: Record<string, React.ElementType> = {
   TV: Tv,
   Beamer: Monitor,
   Coffee: Coffee,
+};
+
+const featureTranslations: Record<string, TranslationKey> = {
+  "Wi-Fi": "wifi",
+  TV: "tv",
+  Beamer: "projector",
+  Coffee: "coffee",
 };
 
 const RoomDetailView = ({ roomId, onBack, onBook }: RoomDetailViewProps) => {
@@ -50,12 +58,15 @@ const RoomDetailView = ({ roomId, onBack, onBook }: RoomDetailViewProps) => {
         <div className="flex gap-4">
           {room.featureKeys.map((key) => {
             const Icon = featureIcons[key] || Wifi;
+            const translationKey = featureTranslations[key];
             return (
               <div key={key} className="flex flex-col items-center gap-1">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-card">
                   <Icon className="h-5 w-5 text-foreground" />
                 </div>
-                <span className="text-[11px] text-muted-foreground">{key}</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {translationKey ? t(translationKey) : key}
+                </span>
               </div>
             );
           })}

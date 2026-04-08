@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { User, Lock, LogIn, LogOut, Shield } from "lucide-react";
+import { User, Lock, LogIn, LogOut, Shield, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AccountViewProps {
   onGovernanceLogin?: () => void;
+  onInvitePeople?: () => void;
 }
 
-const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
+const AccountView = ({ onGovernanceLogin, onInvitePeople }: AccountViewProps) => {
   const { t } = useLanguage();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
@@ -17,11 +18,17 @@ const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (username === "hubmanager" && password === "1234") {
-      setIsLoggedIn(true);
-      onGovernanceLogin?.();
+
+    if (username === "hubmanager") {
+      if (password === "1234") {
+        setIsLoggedIn(true);
+        onGovernanceLogin?.();
+        return;
+      }
+      setError(t("wrongPassword"));
       return;
     }
+
     if (username && password) {
       setIsLoggedIn(true);
       return;
@@ -53,8 +60,16 @@ const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
         </motion.div>
 
         <button
+          onClick={() => onInvitePeople?.()}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 font-display text-sm font-bold text-primary-foreground"
+        >
+          <UserPlus className="h-4 w-4" />
+          {t("invitePeople")}
+        </button>
+
+        <button
           onClick={() => { setIsLoggedIn(false); setUsername(""); setPassword(""); }}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-destructive"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-destructive"
         >
           <LogOut className="h-4 w-4" />
           {t("logout")}
@@ -106,7 +121,15 @@ const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
             </div>
           </div>
 
-          {error && <p className="text-xs text-destructive">{error}</p>}
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive"
+            >
+              {error}
+            </motion.p>
+          )}
         </div>
 
         <button
@@ -119,7 +142,7 @@ const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
 
         <div className="flex items-center gap-2 rounded-lg bg-secondary/50 p-3 text-[11px] text-muted-foreground">
           <Shield className="h-4 w-4 flex-shrink-0" />
-          <span>Hub Manager? Log in with credentials for the governance dashboard.</span>
+          <span>{t("hubManagerHint")}</span>
         </div>
       </motion.form>
     </div>

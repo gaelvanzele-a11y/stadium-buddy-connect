@@ -16,6 +16,8 @@ import SearchView from "@/components/SearchView";
 import BookingsView, { type Booking } from "@/components/BookingsView";
 import CommunityFeedbackView from "@/components/CommunityFeedbackView";
 import GovernanceDashboard from "@/components/GovernanceDashboard";
+import ChatbotWidget from "@/components/ChatbotWidget";
+import InvitePeopleView from "@/components/InvitePeopleView";
 import { rooms } from "@/data/rooms";
 
 export type AppView =
@@ -30,7 +32,8 @@ export type AppView =
   | { type: "energy" }
   | { type: "account" }
   | { type: "feedback" }
-  | { type: "governance" };
+  | { type: "governance" }
+  | { type: "invite" };
 
 const Index = () => {
   const { t } = useLanguage();
@@ -129,11 +132,13 @@ const Index = () => {
       case "energy":
         return <EnergySharingView onBack={goHome} />;
       case "account":
-        return <AccountView onGovernanceLogin={handleGovernanceLogin} />;
+        return <AccountView onGovernanceLogin={handleGovernanceLogin} onInvitePeople={() => setView({ type: "invite" })} />;
       case "feedback":
         return <CommunityFeedbackView />;
       case "governance":
         return <GovernanceDashboard />;
+      case "invite":
+        return <InvitePeopleView onBack={() => setView({ type: "account" })} />;
       default:
         return null;
     }
@@ -225,6 +230,7 @@ const Index = () => {
         )}
       </AnimatePresence>
 
+      <ChatbotWidget />
       <BottomNav activeTab={bottomTab} onTabChange={handleBottomTab} />
     </div>
   );

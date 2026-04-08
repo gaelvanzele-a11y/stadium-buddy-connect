@@ -1,7 +1,8 @@
-import { CheckCircle2, Calendar, Clock, QrCode } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, QrCode, Navigation, Car } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
+import { toast } from "sonner";
 
 interface BookingSuccessViewProps {
   roomId: string;
@@ -12,6 +13,17 @@ const BookingSuccessView = ({ roomId, onBack }: BookingSuccessViewProps) => {
   const { t } = useLanguage();
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return null;
+
+  const handleDirections = () => {
+    window.open(
+      "https://www.google.com/maps/dir/UHasselt,+Martelarenlaan+42,+3500+Hasselt/Mijnstadion,+Beringen",
+      "_blank"
+    );
+  };
+
+  const handleReserveCar = () => {
+    toast.success(t("carReserved"));
+  };
 
   return (
     <div className="flex flex-col items-center px-5 pb-24 pt-10 text-center">
@@ -41,21 +53,28 @@ const BookingSuccessView = ({ roomId, onBack }: BookingSuccessViewProps) => {
       {/* Digital Key / QR */}
       <div className="mt-5 w-full rounded-xl border border-border bg-card p-5 card-shadow">
         <p className="mb-1 font-display text-sm font-bold text-foreground">{t("digitalKey")}</p>
-        <p className="mb-4 text-xs text-muted-foreground">{t("scanAtEntrance")} QR code</p>
+        <p className="mb-4 text-xs text-muted-foreground">{t("scanAtEntrance")}</p>
         <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-xl border-2 border-dashed border-border bg-secondary">
           <QrCode className="h-16 w-16 text-foreground" />
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">{t("scanAtEntrance")} C</p>
       </div>
 
       <div className="mt-5 w-full space-y-3">
         <button className="w-full rounded-xl bg-accent py-3 font-display text-sm font-bold text-accent-foreground">
           {t("openSmartLock")}
         </button>
-        <button className="w-full rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground">
+        <button
+          onClick={handleDirections}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground"
+        >
+          <Navigation className="h-4 w-4" />
           {t("routeDescription")}
         </button>
-        <button className="w-full rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground">
+        <button
+          onClick={handleReserveCar}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground"
+        >
+          <Car className="h-4 w-4" />
           {t("reserveSharedCar")}
         </button>
       </div>
