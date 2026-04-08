@@ -1,10 +1,14 @@
-import { ArrowLeft, Car, Bike, Battery, Zap, MapPin } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck, CircleDot, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
   const { t } = useLanguage();
+  const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
+  const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
@@ -22,9 +26,40 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
     { id: "E-06", battery: 63, locationKey: "eastWing" as const, status: "available" as const },
   ];
 
+  const sharedCars = [
+    { id: "SC-01", name: "VW ID.4", type: "electric", locationKey: "northGate" as const, available: true },
+    { id: "SC-02", name: "Renault Zoe", type: "electric", locationKey: "eastWing" as const, available: true },
+    { id: "SC-03", name: "Toyota Yaris", type: "hybrid", locationKey: "southGate" as const, available: false },
+  ];
+
+  const carpoolRides = [
+    { id: "1", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride1Driver" as const, timeKey: "ride1Time" as const, seats: 3 },
+    { id: "2", fromKey: "ride2From" as const, toKey: "ride2To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 2 },
+    { id: "3", fromKey: "ride3From" as const, toKey: "ride3To" as const, driverKey: "ride3Driver" as const, timeKey: "ride3Time" as const, seats: 4 },
+  ];
+
   const totalSpaces = parkingZones.reduce((a, z) => a + z.total, 0);
   const totalOccupied = parkingZones.reduce((a, z) => a + z.occupied, 0);
   const totalFree = totalSpaces - totalOccupied;
+
+  const handleRentBike = (bikeId: string, locationKey: string) => {
+    toast.success(`${t("bikeRented")} ${t(locationKey as any)}`);
+  };
+
+  const handleReserveCar = (carName: string) => {
+    toast.success(`${t("carReserved")} ${carName}`);
+  };
+
+  const handleRequestRide = () => {
+    toast.success(t("rideRequested"));
+  };
+
+  const sections = [
+    { id: "parking" as const, label: t("parkingSpaces").split(" ")[0], icon: Car },
+    { id: "bikes" as const, label: t("eBike"), icon: Bike },
+    { id: "shared" as const, label: t("sharedCar"), icon: Truck },
+    { id: "carpool" as const, label: t("carpoolTitle"), icon: Users },
+  ];
 
   return (
     <div className="px-5 pb-24 pt-2">
@@ -32,83 +67,260 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
         <ArrowLeft className="h-5 w-5" />
       </button>
 
-      <h2 className="mb-5 font-display text-lg font-extrabold text-accent uppercase">
+      <h2 className="mb-4 font-display text-lg font-extrabold text-accent uppercase">
         {t("sharedMobility")}
       </h2>
 
-      <div className="mb-5 rounded-xl bg-card p-5 card-shadow">
-        <p className="text-sm text-muted-foreground">{t("parkingSpaces")}</p>
-        <p className="font-display text-4xl font-extrabold text-mobility-blue">{totalFree}</p>
-        <Progress value={(totalOccupied / totalSpaces) * 100} className="mt-3 h-2 bg-secondary [&>div]:bg-mobility-blue" />
-      </div>
-
-      <div className="mb-6 space-y-3">
-        {parkingZones.map((zone, i) => {
-          const free = zone.total - zone.occupied;
-          const pct = (zone.occupied / zone.total) * 100;
+      {/* Section tabs */}
+      <div className="mb-5 flex gap-2 overflow-x-auto">
+        {sections.map((s) => {
+          const Icon = s.icon;
           return (
-            <motion.div
-              key={zone.zoneKey}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="rounded-xl bg-card p-4 card-shadow"
+            <button
+              key={s.id}
+              onClick={() => setActiveSection(s.id)}
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                activeSection === s.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground"
+              }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-mobility-blue" />
-                  <span className="font-display text-sm font-bold text-foreground">{t(zone.zoneKey)}</span>
-                </div>
-                <span className={`font-display text-lg font-extrabold ${free < 20 ? "text-destructive" : "text-primary"}`}>
-                  {free}
-                </span>
-              </div>
-              <Progress value={pct} className={`mt-2 h-1.5 bg-secondary ${pct > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-mobility-blue"}`} />
-              <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
-                <Zap className="h-3 w-3" /> {zone.evAvailable}/{zone.evChargers} {t("evChargers")}
-              </div>
-            </motion.div>
+              <Icon className="h-3.5 w-3.5" />
+              {s.label}
+            </button>
           );
         })}
       </div>
 
-      <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
-        <Bike className="h-4 w-4 text-primary" /> {t("eBikes")}
-      </h3>
-      <div className="space-y-2">
-        {bikes.map((bike, i) => (
-          <motion.div
-            key={bike.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 + i * 0.04 }}
-            className="flex items-center justify-between rounded-xl bg-card p-3 card-shadow"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
-                <Bike className="h-4 w-4 text-primary" />
+      {/* PARKING SECTION */}
+      {activeSection === "parking" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="mb-5 rounded-xl bg-card p-5 card-shadow">
+            <p className="text-sm text-muted-foreground">{t("parkingSpaces")}</p>
+            <p className="font-display text-4xl font-extrabold text-mobility-blue">{totalFree}</p>
+            <Progress value={(totalOccupied / totalSpaces) * 100} className="mt-3 h-2 bg-secondary [&>div]:bg-mobility-blue" />
+          </div>
+
+          <div className="space-y-3">
+            {parkingZones.map((zone, i) => {
+              const free = zone.total - zone.occupied;
+              const pct = (zone.occupied / zone.total) * 100;
+              return (
+                <motion.div
+                  key={zone.zoneKey}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="rounded-xl bg-card p-4 card-shadow"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-mobility-blue" />
+                      <span className="font-display text-sm font-bold text-foreground">{t(zone.zoneKey)}</span>
+                    </div>
+                    <span className={`font-display text-lg font-extrabold ${free < 20 ? "text-destructive" : "text-primary"}`}>
+                      {free}
+                    </span>
+                  </div>
+                  <Progress value={pct} className={`mt-2 h-1.5 bg-secondary ${pct > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-mobility-blue"}`} />
+                  <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Zap className="h-3 w-3" /> {zone.evAvailable}/{zone.evChargers} {t("evChargers")}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* BIKES SECTION */}
+      {activeSection === "bikes" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="space-y-2">
+            {bikes.map((bike, i) => (
+              <motion.div
+                key={bike.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.04 }}
+                className="flex items-center justify-between rounded-xl bg-card p-3 card-shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
+                    <Bike className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
+                    <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1 text-xs">
+                    <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
+                    <span className="text-muted-foreground">{bike.battery}%</span>
+                  </div>
+                  {bike.status === "available" ? (
+                    <button
+                      onClick={() => handleRentBike(bike.id, bike.locationKey)}
+                      className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      {t("rent")}
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground">{bike.status === "in-use" ? t("inUse") : t("charging")}</span>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* SHARED CARS SECTION */}
+      {activeSection === "shared" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
+            <Car className="h-4 w-4 text-primary" /> {t("sharedCars")}
+          </h3>
+          <div className="space-y-2">
+            {sharedCars.map((car, i) => (
+              <motion.div
+                key={car.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className="flex items-center justify-between rounded-xl bg-card p-4 card-shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                    <Car className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{car.name}</p>
+                    <p className="text-[11px] text-muted-foreground">{t(car.locationKey)} · {car.type}</p>
+                  </div>
+                </div>
+                {car.available ? (
+                  <button
+                    onClick={() => handleReserveCar(car.name)}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                  >
+                    {t("reserveCar")}
+                  </button>
+                ) : (
+                  <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
+                    {t("occupied")}
+                  </span>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* CARPOOL SECTION */}
+      {activeSection === "carpool" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="mb-4 flex gap-2">
+            <button
+              onClick={() => setCarpoolTab("find")}
+              className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-colors ${
+                carpoolTab === "find" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {t("findRide")}
+            </button>
+            <button
+              onClick={() => setCarpoolTab("offer")}
+              className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-colors ${
+                carpoolTab === "offer" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {t("offerRide")}
+            </button>
+          </div>
+
+          {carpoolTab === "find" && (
+            <div className="space-y-2">
+              {carpoolRides.map((ride, i) => (
+                <motion.div
+                  key={ride.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="rounded-xl bg-card p-4 card-shadow"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-foreground">
+                        {t(ride.fromKey)} → {t(ride.toKey)}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {t(ride.driverKey)} · {t(ride.timeKey)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">{ride.seats} {t("rideSeats")}</p>
+                      <button
+                        onClick={handleRequestRide}
+                        className="mt-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
+                      >
+                        {t("requestRide")}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {carpoolTab === "offer" && (
+            <div className="rounded-xl bg-card p-4 card-shadow space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideFrom")}</label>
+                <input
+                  type="text"
+                  placeholder="UHasselt"
+                  className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
-                <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideTo")}</label>
+                <input
+                  type="text"
+                  placeholder="Mijnstadion"
+                  className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
               </div>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <div className="flex items-center gap-1 text-xs">
-                <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
-                <span className="text-muted-foreground">{bike.battery}%</span>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideWhen")}</label>
+                  <input
+                    type="date"
+                    className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div className="w-20">
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideSeats")}</label>
+                  <input
+                    type="number"
+                    defaultValue={3}
+                    min={1}
+                    max={7}
+                    className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
               </div>
-              {bike.status === "available" ? (
-                <button className="rounded-md bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                  {t("rent")}
-                </button>
-              ) : (
-                <span className="text-[11px] text-muted-foreground">{bike.status === "in-use" ? t("inUse") : t("charging")}</span>
-              )}
+              <button
+                onClick={() => toast.success(t("offerRide") + " ✓")}
+                className="w-full rounded-xl bg-primary py-3 font-display text-sm font-bold text-primary-foreground"
+              >
+                {t("offerRide")}
+              </button>
             </div>
-          </motion.div>
-        ))}
-      </div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 };

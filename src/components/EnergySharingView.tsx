@@ -100,11 +100,6 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
           </motion.div>
         ))}
       </div>
-
-      <button className="mt-5 w-full rounded-xl border border-energy-leaf/30 bg-card py-3 font-display text-sm font-bold text-energy-leaf">
-        <Sun className="mr-2 inline-block h-4 w-4" />
-        {t("manageEnergy")}
-      </button>
     </div>
   );
 };
