@@ -1,4 +1,4 @@
-import { X, Home, Briefcase, Bike, Leaf, MessageSquare } from "lucide-react";
+import { X, Home, Briefcase, Bike, Leaf, MessageSquare, Ticket } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -16,6 +16,7 @@ const MenuOverlay = ({ open, onClose, onNavigate }: MenuOverlayProps) => {
     { id: "rooms", label: t("workspaces"), icon: Briefcase },
     { id: "mobility", label: t("sharedMobility"), icon: Bike },
     { id: "energy", label: t("neighborhoodEnergy"), icon: Leaf },
+    { id: "ticketshop", label: t("ticketshop"), icon: Ticket },
     { id: "feedback", label: t("communityFeedback"), icon: MessageSquare },
   ];
 
