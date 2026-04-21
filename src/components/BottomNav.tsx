@@ -1,20 +1,24 @@
-import { Home, Search, CalendarDays, User, MessageSquare } from "lucide-react";
+import { Home, Search, CalendarDays, Ticket, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  isManager?: boolean;
 }
 
-const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
+const BottomNav = ({ activeTab, onTabChange, isManager = false }: BottomNavProps) => {
   const { t } = useLanguage();
+
+  // Hub manager has no bottom nav at all (KPI dashboard only)
+  if (isManager) return null;
 
   const tabs = [
     { id: "home", label: t("home"), icon: Home },
     { id: "search", label: t("search"), icon: Search },
     { id: "bookings", label: t("bookings"), icon: CalendarDays },
     { id: "feedback", label: t("concerns"), icon: MessageSquare },
-    { id: "account", label: t("account"), icon: User },
+    { id: "ticketshop", label: t("ticketshopShort"), icon: Ticket },
   ];
 
   return (
