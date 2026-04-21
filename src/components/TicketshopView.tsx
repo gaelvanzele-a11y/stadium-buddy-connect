@@ -60,7 +60,7 @@ const computePrice = (base: number, sectionId: string, seatId: string) => {
 const TicketshopView = ({ onBack }: TicketshopViewProps) => {
   const { t, lang } = useLanguage();
   const { bookings, cardBalance, addBooking, topUpCard } = useBookings();
-  const [tab, setTab] = useState<"tickets" | "card" | "history">("tickets");
+  const [tab, setTab] = useState<"tickets" | "card">("tickets");
   const [sportFilter, setSportFilter] = useState<"all" | "football" | "hockey">("all");
   const [selections, setSelections] = useState<Record<string, SeatSelection>>({});
   const [topUp, setTopUp] = useState<number>(20);
@@ -163,7 +163,6 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
         {([
           { id: "tickets" as const, label: t("buyTickets") },
           { id: "card" as const, label: t("consumptionCard") },
-          { id: "history" as const, label: t("transactionHistory") },
         ]).map((it) => (
           <button
             key={it.id}
