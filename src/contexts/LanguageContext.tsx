@@ -572,7 +572,7 @@ const translations = {
     cancelRide: "Rit annuleren",
     cancelConfirmTitle: "Deze boeking annuleren?",
     cancelFreeDesc: "Je bent meer dan 24 uur voor de starttijd. Annuleren is gratis.",
-    cancelLateDesc: "Er wordt een administratieve kost van €5 aangerekend voor late annulering.",
+    cancelLateDesc: "Annuleren binnen 24 uur leidt tot een administratieve kost van €5. Wil je doorgaan?",
     keepBooking: "Behouden",
     confirmCancel: "Annulering bevestigen",
     cancellationFree: "Annulering bevestigd — geen kosten.",
