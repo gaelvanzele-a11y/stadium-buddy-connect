@@ -209,7 +209,7 @@ const translations = {
     // Room availability
     availableUnits: "available",
     // Ticketshop
-    ticketshop: "KVK Beringen Ticketshop",
+    ticketshop: "Ticketshop",
     ticketshopSubtitle: "Buy tickets and top up your card",
     buyTickets: "Buy Tickets",
     consumptionCard: "Consumption Card",
@@ -265,6 +265,10 @@ const translations = {
     sectionStandard: "Standard",
     sectionEconomy: "Economy",
     pricePerSeat: "Price",
+    reservedSlot: "Reserved",
+    selectCar: "Select a shared car",
+    noCarOption: "No car",
+    sharedCarReservation: "Shared Car Reservation",
   },
   nl: {
     welcome: "WELKOM BIJ HET MIJNSTADION",
@@ -472,7 +476,7 @@ const translations = {
     // Room availability
     availableUnits: "beschikbaar",
     // Ticketshop
-    ticketshop: "KVK Beringen Ticketshop",
+    ticketshop: "Ticketshop",
     ticketshopSubtitle: "Koop tickets en laad je kaart op",
     buyTickets: "Tickets Kopen",
     consumptionCard: "Consumptiekaart",
@@ -528,6 +532,10 @@ const translations = {
     sectionStandard: "Standaard",
     sectionEconomy: "Economy",
     pricePerSeat: "Prijs",
+    reservedSlot: "Gereserveerd",
+    selectCar: "Kies een deelauto",
+    noCarOption: "Geen auto",
+    sharedCarReservation: "Deelauto reservering",
   },
 } as const;
 
