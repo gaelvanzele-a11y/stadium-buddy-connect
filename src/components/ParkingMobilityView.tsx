@@ -15,7 +15,12 @@ interface ParkingMobilityViewProps {
   onViewBookings?: () => void;
 }
 
-const timeOptions = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+
+const toMin = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
 
 const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
@@ -24,7 +29,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [time, setTime] = useState("14:00");
+  const [startTime, setStartTime] = useState("14:00");
+  const [endTime, setEndTime] = useState("16:00");
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
@@ -62,14 +68,13 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
 
   const dateISO = date ? format(date, "yyyy-MM-dd") : "";
   const dateLabel = date ? format(date, "d MMM yyyy") : todayLabel;
-  const [hh, mm] = time.split(":").map(Number);
-  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-  const slotLabel = `${time} - ${endTime}`;
+  const validRange = toMin(endTime) > toMin(startTime);
+  const slotLabel = `${startTime} - ${endTime}`;
 
   const confirmBooking = (
     info: MobilityBookingInfo,
     kind: "bike" | "car" | "carpool",
-    extra?: { itemId?: string; dateISO?: string; startTime?: string }
+    extra?: { itemId?: string; dateISO?: string; startTime?: string; endTime?: string }
   ) => {
     setConfirmation(info);
     addBooking({
@@ -80,6 +85,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       dateISO: extra?.dateISO,
       time: info.time,
       startTime: extra?.startTime,
+      endTime: extra?.endTime,
       itemId: extra?.itemId,
       location: info.location,
     });
@@ -92,7 +98,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "bike", { itemId: bikeId, dateISO, startTime: time });
+    }, "bike", { itemId: bikeId, dateISO, startTime, endTime });
   };
 
   const handleReserveCar = (carId: string, carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
@@ -102,7 +108,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "car", { itemId: carId, dateISO, startTime: time });
+    }, "car", { itemId: carId, dateISO, startTime, endTime });
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
