@@ -213,12 +213,16 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       {/* BIKES SECTION */}
       {activeSection === "bikes" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          {!validRange && (
+            <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
+          )}
           <div className="space-y-2">
             {bikes.map((bike, i) => {
               const slotTaken =
+                !validRange ||
                 bike.status !== "available" ||
-                isMobilitySlotBooked("bike", bike.id, dateISO, time);
+                isMobilitySlotBooked("bike", bike.id, dateISO, startTime, endTime);
               return (
                 <motion.div
                   key={bike.id}
@@ -274,11 +278,14 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
           <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
             <Car className="h-4 w-4 text-primary" /> {t("sharedCars")}
           </h3>
-          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          {!validRange && (
+            <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
+          )}
           <div className="space-y-2">
             {sharedCars.map((car, i) => {
               const slotTaken =
-                !car.available || isMobilitySlotBooked("car", car.id, dateISO, time);
+                !validRange || !car.available || isMobilitySlotBooked("car", car.id, dateISO, startTime, endTime);
               return (
                 <motion.div
                   key={car.id}
