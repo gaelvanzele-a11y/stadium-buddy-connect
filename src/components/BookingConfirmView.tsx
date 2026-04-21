@@ -7,21 +7,24 @@ import { rooms } from "@/data/rooms";
 interface BookingConfirmViewProps {
   roomId: string;
   date: Date;
-  time: string;
+  startTime: string;
+  endTime: string;
   onBack: () => void;
   onConfirm: () => void;
 }
 
-const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingConfirmViewProps) => {
+const BookingConfirmView = ({ roomId, date, startTime, endTime, onBack, onConfirm }: BookingConfirmViewProps) => {
   const { t, lang } = useLanguage();
   const [inviteEmail, setInviteEmail] = useState("");
   const [invitees, setInvitees] = useState<string[]>([]);
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return null;
 
-  // Compute end time (2-hour slot)
-  const [hh, mm] = time.split(":").map(Number);
-  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const toMin = (s: string) => {
+    const [h, m] = s.split(":").map(Number);
+    return h * 60 + (m || 0);
+  };
+  const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
   const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
 
   const addInvitee = () => {
@@ -49,11 +52,11 @@ const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingCo
       <div className="mb-5 rounded-xl border border-border bg-card p-4 card-shadow">
         <div className="flex items-center gap-3 mb-2">
           <Calendar className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">{dateLabel}, {time}-{endTime}</span>
+          <span className="text-sm font-semibold text-foreground">{dateLabel}, {startTime}-{endTime}</span>
         </div>
         <div className="flex items-center gap-3">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">2 {t("hours")} - €{room.pricePerHour * 2}</span>
+          <span className="text-sm text-muted-foreground">{hours} {t("hours")} - €{room.pricePerHour * hours}</span>
         </div>
       </div>
 
