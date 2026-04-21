@@ -327,37 +327,49 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
               <p className="py-6 text-center text-sm text-muted-foreground">{t("noTransactions")}</p>
             ) : (
               <div className="space-y-2">
-                {transactions.map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                        tx.kind === "topup" ? "bg-energy-leaf/20" : "bg-primary/10"
+                {transactions.map((tx) => {
+                  // Determine signed amount: top-ups can be positive (credit) or negative (fee).
+                  const rawAmount =
+                    tx.kind === "topup" ? (tx.amount ?? 0) : -(tx.price ?? 0);
+                  const isCredit = rawAmount > 0;
+                  const isFee = tx.kind === "topup" && rawAmount < 0;
+                  const label = isFee
+                    ? t("lateCancelFee")
+                    : tx.kind === "topup"
+                      ? t("toppedUp")
+                      : tx.roomName;
+                  return (
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                          isCredit ? "bg-energy-leaf/20" : "bg-destructive/10"
+                        }`}>
+                          {isCredit ? (
+                            <Wallet className="h-4 w-4 text-energy-leaf" />
+                          ) : isFee ? (
+                            <Wallet className="h-4 w-4 text-destructive" />
+                          ) : (
+                            <Ticket className="h-4 w-4 text-destructive" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-foreground">{label}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {tx.date}{tx.section ? ` · ${t("section")} ${tx.section}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`font-display text-sm font-extrabold ${
+                        isCredit ? "text-energy-leaf" : "text-destructive"
                       }`}>
-                        {tx.kind === "topup" ? (
-                          <Wallet className="h-4 w-4 text-energy-leaf" />
-                        ) : (
-                          <Ticket className="h-4 w-4 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-foreground">
-                          {tx.kind === "topup" ? t("toppedUp") : tx.roomName}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {tx.date}{tx.section ? ` · ${t("section")} ${tx.section}` : ""}
-                        </p>
-                      </div>
+                        {isCredit ? "+" : "-"}€{Math.abs(rawAmount)}
+                      </span>
                     </div>
-                    <span className={`font-display text-sm font-extrabold ${
-                      tx.kind === "topup" ? "text-energy-leaf" : "text-foreground"
-                    }`}>
-                      {tx.kind === "topup" ? "+" : "−"}€{tx.kind === "topup" ? tx.amount : tx.price}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
