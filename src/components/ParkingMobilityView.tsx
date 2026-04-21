@@ -428,4 +428,66 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
   );
 };
 
+interface DateTimeFilterProps {
+  date: Date | undefined;
+  setDate: (d: Date | undefined) => void;
+  time: string;
+  setTime: (t: string) => void;
+  t: (k: string) => string;
+}
+
+const DateTimeFilter = ({ date, setDate, time, setTime, t }: DateTimeFilterProps) => (
+  <div className="mb-4 flex gap-2 overflow-x-auto text-xs">
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
+          <CalendarIcon className="h-3.5 w-3.5 text-primary" />
+          {t("date")}: {date ? format(date, "d MMM") : t("pickADate")}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+          initialFocus
+          modifiersClassNames={{
+            today:
+              date && date.toDateString() !== new Date().toDateString()
+                ? "!bg-transparent !text-foreground"
+                : "",
+          }}
+          className={cn("p-3 pointer-events-auto")}
+        />
+      </PopoverContent>
+    </Popover>
+
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
+          <Clock className="h-3.5 w-3.5 text-primary" />
+          {t("time")}: {time}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-32 p-2" align="start">
+        <div className="grid grid-cols-2 gap-1">
+          {timeOptions.map((tm) => (
+            <button
+              key={tm}
+              onClick={() => setTime(tm)}
+              className={cn(
+                "rounded-md px-2 py-2 text-sm",
+                time === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+              )}
+            >
+              {tm}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  </div>
+);
+
 export default ParkingMobilityView;
