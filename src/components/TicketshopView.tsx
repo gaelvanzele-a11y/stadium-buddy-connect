@@ -60,7 +60,7 @@ const computePrice = (base: number, sectionId: string, seatId: string) => {
 const TicketshopView = ({ onBack }: TicketshopViewProps) => {
   const { t, lang } = useLanguage();
   const { bookings, cardBalance, addBooking, topUpCard } = useBookings();
-  const [tab, setTab] = useState<"tickets" | "card" | "history">("tickets");
+  const [tab, setTab] = useState<"tickets" | "card">("tickets");
   const [sportFilter, setSportFilter] = useState<"all" | "football" | "hockey">("all");
   const [selections, setSelections] = useState<Record<string, SeatSelection>>({});
   const [topUp, setTopUp] = useState<number>(20);
@@ -163,7 +163,6 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
         {([
           { id: "tickets" as const, label: t("buyTickets") },
           { id: "card" as const, label: t("consumptionCard") },
-          { id: "history" as const, label: t("transactionHistory") },
         ]).map((it) => (
           <button
             key={it.id}
@@ -317,52 +316,51 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
               {t("confirmAndPay")} €{topUp}
             </button>
           </div>
-        </div>
-      )}
 
-      {tab === "history" && (
-        <div className="mt-5">
-          <div className="mb-3 flex items-center gap-2 text-foreground">
-            <History className="h-4 w-4 text-primary" />
-            <p className="font-display text-sm font-bold">{t("transactionHistory")}</p>
-          </div>
-          {transactions.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">{t("noTransactions")}</p>
-          ) : (
-            <div className="space-y-2">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-card p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                      tx.kind === "topup" ? "bg-energy-leaf/20" : "bg-primary/10"
-                    }`}>
-                      {tx.kind === "topup" ? (
-                        <Wallet className="h-4 w-4 text-energy-leaf" />
-                      ) : (
-                        <Ticket className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-foreground">
-                        {tx.kind === "topup" ? t("toppedUp") : tx.roomName}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {tx.date}{tx.section ? ` · ${t("section")} ${tx.section}` : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`font-display text-sm font-extrabold ${
-                    tx.kind === "topup" ? "text-energy-leaf" : "text-foreground"
-                  }`}>
-                    {tx.kind === "topup" ? "+" : "−"}€{tx.kind === "topup" ? tx.amount : tx.price}
-                  </span>
-                </div>
-              ))}
+          {/* Transaction history (now under Consumption Card) */}
+          <div className="rounded-xl bg-card p-4 card-shadow">
+            <div className="mb-3 flex items-center gap-2 text-foreground">
+              <History className="h-4 w-4 text-primary" />
+              <p className="font-display text-sm font-bold">{t("transactionHistory")}</p>
             </div>
-          )}
+            {transactions.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">{t("noTransactions")}</p>
+            ) : (
+              <div className="space-y-2">
+                {transactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                        tx.kind === "topup" ? "bg-energy-leaf/20" : "bg-primary/10"
+                      }`}>
+                        {tx.kind === "topup" ? (
+                          <Wallet className="h-4 w-4 text-energy-leaf" />
+                        ) : (
+                          <Ticket className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-foreground">
+                          {tx.kind === "topup" ? t("toppedUp") : tx.roomName}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {tx.date}{tx.section ? ` · ${t("section")} ${tx.section}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`font-display text-sm font-extrabold ${
+                      tx.kind === "topup" ? "text-energy-leaf" : "text-foreground"
+                    }`}>
+                      {tx.kind === "topup" ? "+" : "−"}€{tx.kind === "topup" ? tx.amount : tx.price}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
