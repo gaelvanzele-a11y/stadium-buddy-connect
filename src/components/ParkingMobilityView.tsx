@@ -1,22 +1,30 @@
 import { useState } from "react";
-import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck } from "lucide-react";
+import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck, CalendarIcon, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
 import { useBookings } from "@/contexts/BookingsContext";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 interface ParkingMobilityViewProps {
   onBack: () => void;
   onViewBookings?: () => void;
 }
 
+const timeOptions = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+
 const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
-  const { addBooking } = useBookings();
+  const { addBooking, isMobilitySlotBooked } = useBookings();
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [time, setTime] = useState("14:00");
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
@@ -52,14 +60,27 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
 
   const todayLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-  const confirmBooking = (info: MobilityBookingInfo, kind: "bike" | "car" | "carpool") => {
+  const dateISO = date ? format(date, "yyyy-MM-dd") : "";
+  const dateLabel = date ? format(date, "d MMM yyyy") : todayLabel;
+  const [hh, mm] = time.split(":").map(Number);
+  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const slotLabel = `${time} - ${endTime}`;
+
+  const confirmBooking = (
+    info: MobilityBookingInfo,
+    kind: "bike" | "car" | "carpool",
+    extra?: { itemId?: string; dateISO?: string; startTime?: string }
+  ) => {
     setConfirmation(info);
     addBooking({
       id: Date.now().toString(),
       kind,
       roomName: `${info.title} — ${info.itemName}`,
       date: info.date,
+      dateISO: extra?.dateISO,
       time: info.time,
+      startTime: extra?.startTime,
+      itemId: extra?.itemId,
       location: info.location,
     });
   };
@@ -69,19 +90,19 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       title: t("bikeBookingTitle"),
       itemName: `${t("bike")} ${bikeId}`,
       location: t(locationKey),
-      date: todayLabel,
-      time: "Now",
-    }, "bike");
+      date: dateLabel,
+      time: slotLabel,
+    }, "bike", { itemId: bikeId, dateISO, startTime: time });
   };
 
-  const handleReserveCar = (carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
+  const handleReserveCar = (carId: string, carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
     confirmBooking({
       title: t("carBookingTitle"),
       itemName: carName,
       location: t(locationKey),
-      date: todayLabel,
-      time: "14:00 - 16:00",
-    }, "car");
+      date: dateLabel,
+      time: slotLabel,
+    }, "car", { itemId: carId, dateISO, startTime: time });
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
@@ -186,42 +207,57 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       {/* BIKES SECTION */}
       {activeSection === "bikes" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
           <div className="space-y-2">
-            {bikes.map((bike, i) => (
-              <motion.div
-                key={bike.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
-                className="flex items-center justify-between rounded-xl bg-card p-3 card-shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
-                    <Bike className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
-                    <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-1 text-xs">
-                    <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
-                    <span className="text-muted-foreground">{bike.battery}%</span>
-                  </div>
-                  {bike.status === "available" ? (
-                    <button
-                      onClick={() => handleRentBike(bike.id, bike.locationKey)}
-                      className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      {t("rent")}
-                    </button>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground">{bike.status === "in-use" ? t("inUse") : t("charging")}</span>
+            {bikes.map((bike, i) => {
+              const slotTaken =
+                bike.status !== "available" ||
+                isMobilitySlotBooked("bike", bike.id, dateISO, time);
+              return (
+                <motion.div
+                  key={bike.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.04 }}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl bg-card p-3 card-shadow transition-all",
+                    slotTaken && "grayscale opacity-50"
                   )}
-                </div>
-              </motion.div>
-            ))}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
+                      <Bike className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
+                      <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1 text-xs">
+                      <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
+                      <span className="text-muted-foreground">{bike.battery}%</span>
+                    </div>
+                    {!slotTaken ? (
+                      <button
+                        onClick={() => handleRentBike(bike.id, bike.locationKey)}
+                        className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        {t("rent")}
+                      </button>
+                    ) : (
+                      <span className="text-[11px] font-semibold text-destructive">
+                        {bike.status === "in-use"
+                          ? t("inUse")
+                          : bike.status === "charging"
+                            ? t("charging")
+                            : t("reservedSlot")}
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       )}
@@ -232,38 +268,46 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
           <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
             <Car className="h-4 w-4 text-primary" /> {t("sharedCars")}
           </h3>
+          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
           <div className="space-y-2">
-            {sharedCars.map((car, i) => (
-              <motion.div
-                key={car.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                className="flex items-center justify-between rounded-xl bg-card p-4 card-shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                    <Car className="h-5 w-5 text-primary" />
+            {sharedCars.map((car, i) => {
+              const slotTaken =
+                !car.available || isMobilitySlotBooked("car", car.id, dateISO, time);
+              return (
+                <motion.div
+                  key={car.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all",
+                    slotTaken && "grayscale opacity-50"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                      <Car className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{car.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{t(car.locationKey)} · {car.type}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{car.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{t(car.locationKey)} · {car.type}</p>
-                  </div>
-                </div>
-                {car.available ? (
-                  <button
-                    onClick={() => handleReserveCar(car.name, car.locationKey)}
-                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                  >
-                    {t("reserveCar")}
-                  </button>
-                ) : (
-                  <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
-                    {t("occupied")}
-                  </span>
-                )}
-              </motion.div>
-            ))}
+                  {!slotTaken ? (
+                    <button
+                      onClick={() => handleReserveCar(car.id, car.name, car.locationKey)}
+                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      {t("reserveCar")}
+                    </button>
+                  ) : (
+                    <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
+                      {t("reservedSlot")}
+                    </span>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       )}
@@ -383,5 +427,67 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
     </div>
   );
 };
+
+interface DateTimeFilterProps {
+  date: Date | undefined;
+  setDate: (d: Date | undefined) => void;
+  time: string;
+  setTime: (t: string) => void;
+  t: (k: string) => string;
+}
+
+const DateTimeFilter = ({ date, setDate, time, setTime, t }: DateTimeFilterProps) => (
+  <div className="mb-4 flex gap-2 overflow-x-auto text-xs">
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
+          <CalendarIcon className="h-3.5 w-3.5 text-primary" />
+          {t("date")}: {date ? format(date, "d MMM") : t("pickADate")}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+          initialFocus
+          modifiersClassNames={{
+            today:
+              date && date.toDateString() !== new Date().toDateString()
+                ? "!bg-transparent !text-foreground"
+                : "",
+          }}
+          className={cn("p-3 pointer-events-auto")}
+        />
+      </PopoverContent>
+    </Popover>
+
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
+          <Clock className="h-3.5 w-3.5 text-primary" />
+          {t("time")}: {time}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-32 p-2" align="start">
+        <div className="grid grid-cols-2 gap-1">
+          {timeOptions.map((tm) => (
+            <button
+              key={tm}
+              onClick={() => setTime(tm)}
+              className={cn(
+                "rounded-md px-2 py-2 text-sm",
+                time === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+              )}
+            >
+              {tm}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  </div>
+);
 
 export default ParkingMobilityView;

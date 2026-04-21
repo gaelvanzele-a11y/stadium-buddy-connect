@@ -13,6 +13,8 @@ export interface Booking {
   // Room-specific
   roomId?: string;
   startTime?: string; // "HH:MM"
+  // Mobility-specific (bike/car)
+  itemId?: string;
   // Ticket-specific
   matchKey?: string;
   section?: string;
@@ -29,6 +31,7 @@ interface BookingsContextValue {
   cardBalance: number;
   addBooking: (b: Booking) => void;
   isRoomSlotBooked: (roomId: string, dateISO: string, startTime: string) => boolean;
+  isMobilitySlotBooked: (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string) => boolean;
   topUpCard: (amount: number) => Booking;
   reset: () => void;
 }
@@ -70,6 +73,26 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
     [bookings]
   );
 
+  const isMobilitySlotBooked = useCallback(
+    (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string) => {
+      const realBooked = bookings.some(
+        (b) =>
+          b.kind === kind &&
+          b.itemId === itemId &&
+          b.dateISO === dateISO &&
+          b.startTime === startTime
+      );
+      if (realBooked) return true;
+      let h = 0;
+      const key = `${kind}|${itemId}|${dateISO}|${startTime}`;
+      for (let i = 0; i < key.length; i++) {
+        h = (h * 31 + key.charCodeAt(i)) >>> 0;
+      }
+      return h % 100 < 30;
+    },
+    [bookings]
+  );
+
   const topUpCard = useCallback((amount: number): Booking => {
     setCardBalance((bal) => bal + amount);
     const b: Booking = {
@@ -91,7 +114,7 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <BookingsContext.Provider value={{ bookings, cardBalance, addBooking, isRoomSlotBooked, topUpCard, reset }}>
+    <BookingsContext.Provider value={{ bookings, cardBalance, addBooking, isRoomSlotBooked, isMobilitySlotBooked, topUpCard, reset }}>
       {children}
     </BookingsContext.Provider>
   );
