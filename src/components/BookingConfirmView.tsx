@@ -1,20 +1,34 @@
-import { ArrowLeft, Calendar, Clock, CreditCard, UserPlus, X, Mail } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CreditCard, UserPlus, X, Mail, Car } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
+
+export interface SelectedCar {
+  id: string;
+  name: string;
+  location: string;
+}
+
+const availableCars: SelectedCar[] = [
+  { id: "SC-01", name: "VW ID.4", location: "North Gate" },
+  { id: "SC-02", name: "Renault Zoe", location: "East Wing" },
+  { id: "SC-04", name: "Tesla Model 3", location: "West VIP" },
+  { id: "SC-05", name: "Peugeot e-208", location: "North Gate" },
+];
 
 interface BookingConfirmViewProps {
   roomId: string;
   date: Date;
   time: string;
   onBack: () => void;
-  onConfirm: () => void;
+  onConfirm: (extras: { car?: SelectedCar }) => void;
 }
 
 const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingConfirmViewProps) => {
   const { t, lang } = useLanguage();
   const [addMobility, setAddMobility] = useState(false);
+  const [selectedCarId, setSelectedCarId] = useState<string>(availableCars[0].id);
   const [inviteEmail, setInviteEmail] = useState("");
   const [invitees, setInvitees] = useState<string[]>([]);
   const room = rooms.find((r) => r.id === roomId);
@@ -30,6 +44,11 @@ const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingCo
     if (!email || invitees.includes(email)) return;
     setInvitees((prev) => [...prev, email]);
     setInviteEmail("");
+  };
+
+  const handleConfirm = () => {
+    const car = addMobility ? availableCars.find((c) => c.id === selectedCarId) : undefined;
+    onConfirm({ car });
   };
 
   return (
@@ -54,7 +73,7 @@ const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingCo
         </div>
       </div>
 
-      {/* Mobility toggle */}
+      {/* Mobility toggle + car selection */}
       <div className="mb-5 rounded-xl border border-border bg-card p-4 card-shadow">
         <div className="flex items-center justify-between">
           <div>
@@ -69,6 +88,42 @@ const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingCo
             <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-card shadow transition-transform ${addMobility ? "left-[22px]" : "left-0.5"}`} />
           </button>
         </div>
+
+        {addMobility && (
+          <div className="mt-4 space-y-2">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+              <Car className="h-3.5 w-3.5 text-primary" />
+              {t("selectCar")}
+            </p>
+            <div className="space-y-1.5">
+              {availableCars.map((car) => (
+                <label
+                  key={car.id}
+                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 text-xs transition-colors ${
+                    selectedCarId === car.id
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-background hover:border-primary/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="car"
+                      value={car.id}
+                      checked={selectedCarId === car.id}
+                      onChange={() => setSelectedCarId(car.id)}
+                      className="accent-primary"
+                    />
+                    <div>
+                      <p className="font-semibold text-foreground">{car.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{car.location}</p>
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Invite people to this session */}
@@ -141,7 +196,7 @@ const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingCo
       </div>
 
       <button
-        onClick={onConfirm}
+        onClick={handleConfirm}
         className="w-full rounded-xl bg-primary py-3.5 font-display text-sm font-bold text-primary-foreground"
       >
         {t("payAndBook")}
