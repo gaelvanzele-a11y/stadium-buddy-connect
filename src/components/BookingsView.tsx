@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useBookings, type BookingKind } from "@/contexts/BookingsContext";
 
 interface BookingsViewProps {
-  onReserveCar: () => void;
+  onReserveCar?: () => void;
 }
 
 const iconForKind = (kind: BookingKind) => {
@@ -18,7 +18,7 @@ const iconForKind = (kind: BookingKind) => {
   }
 };
 
-const BookingsView = ({ onReserveCar }: BookingsViewProps) => {
+const BookingsView = ({}: BookingsViewProps) => {
   const { t } = useLanguage();
   const { bookings } = useBookings();
 
@@ -30,23 +30,6 @@ const BookingsView = ({ onReserveCar }: BookingsViewProps) => {
       <h2 className="mb-5 font-display text-lg font-extrabold text-accent uppercase">
         {t("bookings")}
       </h2>
-
-      {/* Quick action: shared car */}
-      <button
-        onClick={onReserveCar}
-        className="mb-5 flex w-full items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all active:scale-[0.98]"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-mobility-blue">
-            <Car className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="text-left">
-            <p className="font-display text-sm font-bold text-foreground">{t("reserveSharedCar")}</p>
-            <p className="text-[11px] text-muted-foreground">{t("reserveSharedCarDesc")}</p>
-          </div>
-        </div>
-        <span className="text-xs font-semibold text-primary">{t("open")}</span>
-      </button>
 
       {upcoming.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">

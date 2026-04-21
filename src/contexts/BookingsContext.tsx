@@ -47,13 +47,25 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
 
   const isRoomSlotBooked = useCallback(
     (roomId: string, dateISO: string, startTime: string) => {
-      return bookings.some(
+      // 1. Real bookings made by the user in this session
+      const realBooked = bookings.some(
         (b) =>
           b.kind === "room" &&
           b.roomId === roomId &&
           b.dateISO === dateISO &&
           b.startTime === startTime
       );
+      if (realBooked) return true;
+
+      // 2. Simulated pre-existing reservations: deterministic per (room, date, time)
+      // so the same room/date/time combination always shows the same status across
+      // the app, but distribution feels realistic (~35% occupied).
+      let h = 0;
+      const key = `${roomId}|${dateISO}|${startTime}`;
+      for (let i = 0; i < key.length; i++) {
+        h = (h * 31 + key.charCodeAt(i)) >>> 0;
+      }
+      return h % 100 < 35;
     },
     [bookings]
   );

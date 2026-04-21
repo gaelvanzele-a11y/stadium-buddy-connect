@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
+import { useBookings } from "@/contexts/BookingsContext";
 import { toast } from "sonner";
 
 interface BookingSuccessViewProps {
@@ -14,8 +15,14 @@ interface BookingSuccessViewProps {
 
 const BookingSuccessView = ({ roomId, date, time, onBack }: BookingSuccessViewProps) => {
   const { t, lang } = useLanguage();
+  const { bookings } = useBookings();
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return null;
+
+  const dateISOForCheck = format(date, "yyyy-MM-dd");
+  const carAlreadyBooked = bookings.some(
+    (b) => b.kind === "car" && b.dateISO === dateISOForCheck && b.time?.startsWith(time)
+  );
 
   const [hh, mm] = time.split(":").map(Number);
   const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
@@ -77,13 +84,15 @@ const BookingSuccessView = ({ roomId, date, time, onBack }: BookingSuccessViewPr
           <Navigation className="h-4 w-4" />
           {t("routeDescription")}
         </button>
-        <button
-          onClick={handleReserveCar}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground"
-        >
-          <Car className="h-4 w-4" />
-          {t("reserveSharedCar")}
-        </button>
+        {!carAlreadyBooked && (
+          <button
+            onClick={handleReserveCar}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground"
+          >
+            <Car className="h-4 w-4" />
+            {t("reserveSharedCar")}
+          </button>
+        )}
       </div>
 
       <button onClick={onBack} className="mt-4 text-sm text-primary font-medium">
