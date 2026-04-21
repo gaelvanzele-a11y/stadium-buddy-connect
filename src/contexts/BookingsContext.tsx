@@ -16,6 +16,11 @@ export interface Booking {
   endTime?: string; // "HH:MM"
   // Mobility-specific (bike/car)
   itemId?: string;
+  // Carpool-specific
+  offeredByUser?: boolean; // true = a ride the user offers; false/undefined = a ride they requested
+  carpoolFrom?: string;
+  carpoolTo?: string;
+  carpoolSeats?: number;
   // Ticket-specific
   matchKey?: string;
   section?: string;
@@ -25,7 +30,12 @@ export interface Booking {
   sportKey?: string;
   // Top-up
   amount?: number;
+  // Cancellation
+  cancelled?: boolean;
+  lateFeeCharged?: boolean;
 }
+
+export const LATE_CANCEL_FEE = 5;
 
 interface BookingsContextValue {
   bookings: Booking[];
@@ -34,6 +44,10 @@ interface BookingsContextValue {
   isRoomSlotBooked: (roomId: string, dateISO: string, startTime: string, endTime?: string) => boolean;
   isMobilitySlotBooked: (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string, endTime?: string) => boolean;
   topUpCard: (amount: number) => Booking;
+  /** Returns true if a late-cancellation fee was applied */
+  cancelBooking: (id: string) => boolean;
+  /** Returns minutes until the booking start. null if no schedule info. */
+  minutesUntilStart: (b: Booking) => number | null;
   reset: () => void;
 }
 
@@ -90,8 +104,9 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
     (roomId: string, dateISO: string, startTime: string, endTime?: string) => {
       const reqEnd = endTime ?? `${String((toMinutes(startTime) + 60) / 60 | 0).padStart(2, "0")}:00`;
 
-      // 1. Real bookings overlapping the requested range
+      // 1. Real bookings overlapping the requested range (skip cancelled)
       const realBooked = bookings.some((b) => {
+        if (b.cancelled) return false;
         if (b.kind !== "room" || b.roomId !== roomId || b.dateISO !== dateISO) return false;
         if (!b.startTime || !b.endTime) return false;
         return rangesOverlap(startTime, reqEnd, b.startTime, b.endTime);
@@ -109,6 +124,7 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
       const reqEnd = endTime ?? `${String((toMinutes(startTime) + 60) / 60 | 0).padStart(2, "0")}:00`;
 
       const realBooked = bookings.some((b) => {
+        if (b.cancelled) return false;
         if (b.kind !== kind || b.itemId !== itemId || b.dateISO !== dateISO) return false;
         if (!b.startTime || !b.endTime) return false;
         return rangesOverlap(startTime, reqEnd, b.startTime, b.endTime);
@@ -135,13 +151,69 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
     return b;
   }, []);
 
+  const minutesUntilStart = useCallback((b: Booking): number | null => {
+    if (!b.dateISO) return null;
+    const time = b.startTime || "00:00";
+    const dt = new Date(`${b.dateISO}T${time}:00`);
+    if (isNaN(dt.getTime())) return null;
+    return Math.round((dt.getTime() - Date.now()) / 60000);
+  }, []);
+
+  const cancelBooking = useCallback(
+    (id: string): boolean => {
+      const target = bookings.find((b) => b.id === id);
+      if (!target) return false;
+      let lateFee = false;
+      if (target.dateISO) {
+        const time = target.startTime || "00:00";
+        const dt = new Date(`${target.dateISO}T${time}:00`);
+        if (!isNaN(dt.getTime())) {
+          const minsUntil = (dt.getTime() - Date.now()) / 60000;
+          if (minsUntil < 24 * 60 && minsUntil > -60) {
+            lateFee = true;
+          }
+        }
+      }
+
+      if (lateFee) {
+        setCardBalance((bal) => bal - LATE_CANCEL_FEE);
+        const feeEntry: Booking = {
+          id: `fee-${Date.now()}`,
+          kind: "topup",
+          roomName: `- €${LATE_CANCEL_FEE}`,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          location: "Late cancellation fee",
+          amount: -LATE_CANCEL_FEE,
+        };
+        setBookings((prev) => [feeEntry, ...prev.filter((b) => b.id !== id)]);
+      } else {
+        setBookings((prev) => prev.filter((b) => b.id !== id));
+      }
+      return lateFee;
+    },
+    [bookings]
+  );
+
   const reset = useCallback(() => {
     setBookings([]);
     setCardBalance(STARTING_BALANCE);
   }, []);
 
   return (
-    <BookingsContext.Provider value={{ bookings, cardBalance, addBooking, isRoomSlotBooked, isMobilitySlotBooked, topUpCard, reset }}>
+    <BookingsContext.Provider
+      value={{
+        bookings,
+        cardBalance,
+        addBooking,
+        isRoomSlotBooked,
+        isMobilitySlotBooked,
+        topUpCard,
+        cancelBooking,
+        minutesUntilStart,
+        reset,
+      }}
+    >
       {children}
     </BookingsContext.Provider>
   );
