@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Zap, Briefcase, Bike, Leaf, Ticket } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBookings, type Booking } from "@/contexts/BookingsContext";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import MenuOverlay from "@/components/MenuOverlay";
@@ -12,7 +13,7 @@ import BookingSuccessView from "@/components/BookingSuccessView";
 import ParkingMobilityView from "@/components/ParkingMobilityView";
 import EnergySharingView from "@/components/EnergySharingView";
 import SearchView from "@/components/SearchView";
-import BookingsView, { type Booking } from "@/components/BookingsView";
+import BookingsView from "@/components/BookingsView";
 import CommunityFeedbackView from "@/components/CommunityFeedbackView";
 import GovernanceDashboard from "@/components/GovernanceDashboard";
 import ChatbotWidget from "@/components/ChatbotWidget";
@@ -39,11 +40,11 @@ export type AppView =
 
 const Index = () => {
   const { t, lang } = useLanguage();
+  const { addBooking, reset } = useBookings();
   const [authedUser, setAuthedUser] = useState<{ name: string; isManager: boolean } | null>(null);
   const [view, setView] = useState<AppView>({ type: "home" });
   const [bottomTab, setBottomTab] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [bookings, setBookings] = useState<Booking[]>([]);
 
   const goHome = () => {
     setView({ type: "home" });
@@ -53,6 +54,11 @@ const Index = () => {
   const goToBookingsList = () => {
     setView({ type: "bookingsList" });
     setBottomTab("bookings");
+  };
+
+  const goToMobility = () => {
+    setView({ type: "mobility" });
+    setBottomTab("");
   };
 
   const handleBottomTab = (tab: string) => {
@@ -77,7 +83,7 @@ const Index = () => {
     setAuthedUser(null);
     setView({ type: "home" });
     setBottomTab("home");
-    setBookings([]);
+    reset();
   };
 
   const handleBookingSuccess = (roomId: string, date: Date, time: string) => {
@@ -85,20 +91,21 @@ const Index = () => {
     if (room) {
       const [hh, mm] = time.split(":").map(Number);
       const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+      const dateISO = format(date, "yyyy-MM-dd");
       const newBooking: Booking = {
         id: Date.now().toString(),
+        kind: "room",
         roomName: room.name,
         date: format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy"),
+        dateISO,
         time: `${time} - ${endTime}`,
+        startTime: time,
+        roomId,
         location: t("stadiumEntrance"),
       };
-      setBookings((prev) => [newBooking, ...prev]);
+      addBooking(newBooking);
     }
     setView({ type: "bookingSuccess", roomId, date, time });
-  };
-
-  const handleAddMobilityBooking = (booking: Booking) => {
-    setBookings((prev) => [booking, ...prev]);
   };
 
   const defaultDate = new Date();
@@ -122,7 +129,7 @@ const Index = () => {
           />
         );
       case "bookingsList":
-        return <BookingsView bookings={bookings} />;
+        return <BookingsView onReserveCar={goToMobility} />;
       case "rooms":
         return (
           <RoomListView
@@ -151,7 +158,7 @@ const Index = () => {
       case "bookingSuccess":
         return <BookingSuccessView roomId={view.roomId} date={view.date} time={view.time} onBack={goHome} />;
       case "mobility":
-        return <ParkingMobilityView onBack={goHome} onAddBooking={handleAddMobilityBooking} onViewBookings={goToBookingsList} />;
+        return <ParkingMobilityView onBack={goHome} onViewBookings={goToBookingsList} />;
       case "energy":
         return <EnergySharingView onBack={goHome} />;
       case "feedback":
@@ -165,7 +172,6 @@ const Index = () => {
     }
   };
 
-  // Gate the entire app behind login
   if (!authedUser) {
     return (
       <LoginGate
@@ -178,7 +184,6 @@ const Index = () => {
     );
   }
 
-  // Hub manager: KPI dashboard only — no nav, no menu, no chatbot
   if (authedUser.isManager) {
     return (
       <div className="mx-auto min-h-screen max-w-lg bg-background pb-10">
