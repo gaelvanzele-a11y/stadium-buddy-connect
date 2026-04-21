@@ -1,10 +1,8 @@
-import { CheckCircle2, Calendar, Clock, QrCode, Navigation, Car } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, QrCode, Navigation } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
-import { useBookings } from "@/contexts/BookingsContext";
-import { toast } from "sonner";
 
 interface BookingSuccessViewProps {
   roomId: string;
@@ -15,14 +13,8 @@ interface BookingSuccessViewProps {
 
 const BookingSuccessView = ({ roomId, date, time, onBack }: BookingSuccessViewProps) => {
   const { t, lang } = useLanguage();
-  const { bookings } = useBookings();
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return null;
-
-  const dateISOForCheck = format(date, "yyyy-MM-dd");
-  const carAlreadyBooked = bookings.some(
-    (b) => b.kind === "car" && b.dateISO === dateISOForCheck && b.time?.startsWith(time)
-  );
 
   const [hh, mm] = time.split(":").map(Number);
   const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
@@ -33,10 +25,6 @@ const BookingSuccessView = ({ roomId, date, time, onBack }: BookingSuccessViewPr
       "https://www.google.com/maps/dir/UHasselt,+Martelarenlaan+42,+3500+Hasselt/Mijnstadion,+Beringen",
       "_blank"
     );
-  };
-
-  const handleReserveCar = () => {
-    toast.success(t("carReserved"));
   };
 
   return (
