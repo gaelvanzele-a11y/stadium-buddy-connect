@@ -49,3 +49,19 @@ export const rooms: Room[] = [
     description_nl: "Flexibele coworking werkplek met uitzicht op het veld. Bureaus, stopcontacten en snelle Wi-Fi inbegrepen.",
   },
 ];
+
+// Unique VIP loges (used in ticketshop & loge selection)
+export interface Loge {
+  id: string;
+  name: string;
+  capacity: number;
+  pricePerMatch: number;
+}
+
+export const loges: Loge[] = [
+  { id: "loge-koolmijn", name: "Loge 'De Koolmijn'", capacity: 8, pricePerMatch: 320 },
+  { id: "loge-mijnwerker", name: "Loge 'De Mijnwerker'", capacity: 10, pricePerMatch: 380 },
+  { id: "loge-terril", name: "Loge 'De Terril'", capacity: 6, pricePerMatch: 260 },
+  { id: "loge-schacht", name: "Loge 'De Schacht'", capacity: 12, pricePerMatch: 450 },
+  { id: "loge-kolenwasserij", name: "Loge 'De Kolenwasserij'", capacity: 8, pricePerMatch: 340 },
+];
