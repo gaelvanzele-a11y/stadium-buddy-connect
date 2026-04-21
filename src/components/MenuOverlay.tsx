@@ -21,7 +21,7 @@ const MenuOverlay = ({ open, onClose, onNavigate, onLogout, isManager = false, u
         { id: "rooms", label: t("workspaces"), icon: Briefcase },
         { id: "mobility", label: t("sharedMobility"), icon: Bike },
         { id: "energy", label: t("neighborhoodEnergy"), icon: Leaf },
-        { id: "ticketshop", label: t("ticketshop"), icon: Ticket },
+        { id: "ticketshop", label: t("ticketshopMenu"), icon: Ticket },
         { id: "feedback", label: t("communityFeedback"), icon: MessageSquare },
       ];
 

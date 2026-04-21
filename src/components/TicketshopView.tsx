@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { ArrowLeft, Ticket, CreditCard, CheckCircle2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowLeft, Ticket, CreditCard, CheckCircle2, History, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBookings, type Booking } from "@/contexts/BookingsContext";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface TicketshopViewProps {
@@ -13,20 +14,25 @@ interface SportEvent {
   sportKey: "football" | "hockey";
   matchKey: string;
   date: string;
-  price: number;
+  basePrice: number;
 }
 
 const events: SportEvent[] = [
-  { id: "fb1", sportKey: "football", matchKey: "matchFootball1", date: "26 Apr 2026 · 20:00", price: 18 },
-  { id: "fb2", sportKey: "football", matchKey: "matchFootball2", date: "03 May 2026 · 14:30", price: 18 },
-  { id: "hk1", sportKey: "hockey", matchKey: "matchHockey1", date: "28 Apr 2026 · 19:00", price: 12 },
-  { id: "hk2", sportKey: "hockey", matchKey: "matchHockey2", date: "05 May 2026 · 15:00", price: 12 },
+  { id: "fb1", sportKey: "football", matchKey: "matchFootball1", date: "26 Apr 2026 · 20:00", basePrice: 18 },
+  { id: "fb2", sportKey: "football", matchKey: "matchFootball2", date: "03 May 2026 · 14:30", basePrice: 18 },
+  { id: "hk1", sportKey: "hockey", matchKey: "matchHockey1", date: "28 Apr 2026 · 19:00", basePrice: 12 },
+  { id: "hk2", sportKey: "hockey", matchKey: "matchHockey2", date: "05 May 2026 · 15:00", basePrice: 12 },
 ];
 
 const topUpOptions = [10, 20, 50, 100];
 
-// Stadium layout: sections, rows, seats per row
-const sections = ["A", "B", "C", "D"];
+// Stadium layout with price tiers per section
+const sections = [
+  { id: "A", tierKey: "sectionPremium", multiplier: 1.6 },
+  { id: "B", tierKey: "sectionStandard", multiplier: 1.2 },
+  { id: "C", tierKey: "sectionStandard", multiplier: 1.0 },
+  { id: "D", tierKey: "sectionEconomy", multiplier: 0.75 },
+];
 const rows = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const seatsPerRow = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
@@ -36,16 +42,38 @@ interface SeatSelection {
   seat: string;
 }
 
+interface PendingPayment {
+  type: "ticket" | "topup";
+  label: string;
+  amount: number;
+  meta?: Record<string, string>;
+  build: () => Booking;
+}
+
+const computePrice = (base: number, sectionId: string, seatId: string) => {
+  const sec = sections.find((s) => s.id === sectionId);
+  const seatNum = parseInt(seatId, 10) || 0;
+  const seatBoost = seatNum <= 3 ? 1.15 : seatNum >= 8 ? 0.95 : 1; // front seats premium
+  return Math.round(base * (sec?.multiplier ?? 1) * seatBoost);
+};
+
 const TicketshopView = ({ onBack }: TicketshopViewProps) => {
-  const { t } = useLanguage();
-  const [tab, setTab] = useState<"tickets" | "card">("tickets");
+  const { t, lang } = useLanguage();
+  const { bookings, cardBalance, addBooking, topUpCard } = useBookings();
+  const [tab, setTab] = useState<"tickets" | "card" | "history">("tickets");
   const [sportFilter, setSportFilter] = useState<"all" | "football" | "hockey">("all");
   const [selections, setSelections] = useState<Record<string, SeatSelection>>({});
   const [topUp, setTopUp] = useState<number>(20);
+  const [pending, setPending] = useState<PendingPayment | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
 
   const filteredEvents = events.filter(
     (e) => sportFilter === "all" || e.sportKey === sportFilter
+  );
+
+  const transactions = useMemo(
+    () => bookings.filter((b) => b.kind === "ticket" || b.kind === "topup"),
+    [bookings]
   );
 
   const updateSelection = (eventId: string, field: keyof SeatSelection, value: string) => {
@@ -60,21 +88,57 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
     }));
   };
 
-  const buyTicket = (event: SportEvent) => {
+  const initiateTicket = (event: SportEvent) => {
     const sel = selections[event.id];
-    if (!sel || !sel.section || !sel.row || !sel.seat) return;
-    setConfirmation(
-      `${t(event.matchKey as never)} — ${t("section")} ${sel.section}, ${t("row")} ${sel.row}, ${t("seat")} ${sel.seat} — €${event.price}`
-    );
-    setSelections((prev) => {
-      const copy = { ...prev };
-      delete copy[event.id];
-      return copy;
+    if (!sel?.section || !sel?.row || !sel?.seat) return;
+    const price = computePrice(event.basePrice, sel.section, sel.seat);
+    setPending({
+      type: "ticket",
+      label: `${t(event.matchKey as never)} — ${t("section")} ${sel.section}, ${t("row")} ${sel.row}, ${t("seat")} ${sel.seat}`,
+      amount: price,
+      build: () => ({
+        id: `tk-${Date.now()}`,
+        kind: "ticket",
+        roomName: t(event.matchKey as never),
+        date: event.date,
+        time: "",
+        location: t("ticketshop"),
+        matchKey: event.matchKey,
+        section: sel.section,
+        row: sel.row,
+        seat: sel.seat,
+        price,
+        sportKey: event.sportKey,
+      }),
     });
   };
 
-  const topUpCard = () => {
-    setConfirmation(`${t("topUpConfirmed")}: €${topUp}`);
+  const initiateTopUp = () => {
+    setPending({
+      type: "topup",
+      label: `${t("clubConsumptionCard")} — €${topUp}`,
+      amount: topUp,
+      build: () => topUpCard(topUp), // produces the booking via context
+    });
+  };
+
+  const completePayment = () => {
+    if (!pending) return;
+    if (pending.type === "ticket") {
+      const booking = pending.build();
+      addBooking(booking);
+      setSelections((prev) => {
+        const copy = { ...prev };
+        Object.keys(copy).forEach((k) => {
+          if (copy[k].section && copy[k].row && copy[k].seat) delete copy[k];
+        });
+        return copy;
+      });
+    } else {
+      pending.build(); // topUpCard already adds booking
+    }
+    setConfirmation(pending.label);
+    setPending(null);
   };
 
   return (
@@ -89,30 +153,28 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
         </div>
         <div>
           <h2 className="font-display text-lg font-extrabold text-accent leading-tight">
-            {t("ticketshop")}
+            {t("ticketshopMenu")}
           </h2>
           <p className="text-[11px] text-muted-foreground">{t("ticketshopSubtitle")}</p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mt-5 flex gap-2 rounded-xl bg-secondary p-1">
-        <button
-          onClick={() => setTab("tickets")}
-          className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-colors ${
-            tab === "tickets" ? "bg-card text-foreground card-shadow" : "text-muted-foreground"
-          }`}
-        >
-          {t("buyTickets")}
-        </button>
-        <button
-          onClick={() => setTab("card")}
-          className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-colors ${
-            tab === "card" ? "bg-card text-foreground card-shadow" : "text-muted-foreground"
-          }`}
-        >
-          {t("consumptionCard")}
-        </button>
+      <div className="mt-5 flex gap-1 rounded-xl bg-secondary p-1">
+        {([
+          { id: "tickets" as const, label: t("buyTickets") },
+          { id: "card" as const, label: t("consumptionCard") },
+          { id: "history" as const, label: t("transactionHistory") },
+        ]).map((it) => (
+          <button
+            key={it.id}
+            onClick={() => setTab(it.id)}
+            className={`flex-1 rounded-lg py-2 text-[11px] font-semibold transition-colors ${
+              tab === it.id ? "bg-card text-foreground card-shadow" : "text-muted-foreground"
+            }`}
+          >
+            {it.label}
+          </button>
+        ))}
       </div>
 
       {tab === "tickets" && (
@@ -137,6 +199,9 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
             {filteredEvents.map((event, i) => {
               const sel = selections[event.id] || { section: "", row: "", seat: "" };
               const ready = sel.section && sel.row && sel.seat;
+              const livePrice = ready
+                ? computePrice(event.basePrice, sel.section, sel.seat)
+                : event.basePrice;
               return (
                 <motion.div
                   key={event.id}
@@ -155,12 +220,16 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
                       </h3>
                       <p className="text-xs text-muted-foreground">{event.date}</p>
                     </div>
-                    <p className="font-display text-sm font-extrabold text-foreground">
-                      €{event.price}
-                    </p>
+                    <div className="text-right">
+                      <p className="font-display text-sm font-extrabold text-foreground">
+                        €{livePrice}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {t("pricePerSeat")}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Seat selection */}
                   <div className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3">
                     <p className="text-[11px] font-semibold uppercase text-muted-foreground">
                       {t("selectSeat")}
@@ -168,19 +237,22 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
                     <div className="grid grid-cols-3 gap-2">
                       <SelectGroup
                         label={t("section")}
-                        options={sections}
+                        options={sections.map((s) => `${s.id} (${t(s.tierKey as never)})`)}
+                        rawOptions={sections.map((s) => s.id)}
                         value={sel.section}
                         onChange={(v) => updateSelection(event.id, "section", v)}
                       />
                       <SelectGroup
                         label={t("row")}
                         options={rows}
+                        rawOptions={rows}
                         value={sel.row}
                         onChange={(v) => updateSelection(event.id, "row", v)}
                       />
                       <SelectGroup
                         label={t("seat")}
                         options={seatsPerRow}
+                        rawOptions={seatsPerRow}
                         value={sel.seat}
                         onChange={(v) => updateSelection(event.id, "seat", v)}
                       />
@@ -193,11 +265,11 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
                   </div>
 
                   <button
-                    onClick={() => buyTicket(event)}
+                    onClick={() => initiateTicket(event)}
                     disabled={!ready}
                     className="mt-3 w-full rounded-lg bg-primary py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-40"
                   >
-                    {ready ? t("buy") : t("pickSeatFirst")}
+                    {ready ? `${t("confirmAndPay")} €${livePrice}` : t("pickSeatFirst")}
                   </button>
                 </motion.div>
               );
@@ -213,7 +285,9 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
               <CreditCard className="h-3.5 w-3.5" />
               {t("clubConsumptionCard")}
             </div>
-            <p className="mt-3 font-display text-2xl font-extrabold">€42,50</p>
+            <p className="mt-3 font-display text-2xl font-extrabold">
+              €{cardBalance.toFixed(2).replace(".", lang === "nl" ? "," : ".")}
+            </p>
             <p className="mt-1 text-xs opacity-90">{t("currentBalance")}</p>
             <p className="mt-3 text-[11px] opacity-90">{t("validForAllSports")}</p>
           </div>
@@ -237,15 +311,112 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
             </div>
 
             <button
-              onClick={topUpCard}
+              onClick={initiateTopUp}
               className="mt-4 w-full rounded-xl bg-primary py-3.5 font-display text-sm font-bold text-primary-foreground"
             >
-              {t("topUpNow")} €{topUp}
+              {t("confirmAndPay")} €{topUp}
             </button>
           </div>
         </div>
       )}
 
+      {tab === "history" && (
+        <div className="mt-5">
+          <div className="mb-3 flex items-center gap-2 text-foreground">
+            <History className="h-4 w-4 text-primary" />
+            <p className="font-display text-sm font-bold">{t("transactionHistory")}</p>
+          </div>
+          {transactions.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">{t("noTransactions")}</p>
+          ) : (
+            <div className="space-y-2">
+              {transactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between rounded-xl border border-border bg-card p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                      tx.kind === "topup" ? "bg-energy-leaf/20" : "bg-primary/10"
+                    }`}>
+                      {tx.kind === "topup" ? (
+                        <Wallet className="h-4 w-4 text-energy-leaf" />
+                      ) : (
+                        <Ticket className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">
+                        {tx.kind === "topup" ? t("toppedUp") : tx.roomName}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {tx.date}{tx.section ? ` · ${t("section")} ${tx.section}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`font-display text-sm font-extrabold ${
+                    tx.kind === "topup" ? "text-energy-leaf" : "text-foreground"
+                  }`}>
+                    {tx.kind === "topup" ? "+" : "−"}€{tx.kind === "topup" ? tx.amount : tx.price}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Mandatory payment dialog */}
+      <Dialog open={pending !== null} onOpenChange={(o) => !o && setPending(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogTitle className="font-display text-base font-extrabold text-accent">
+            {t("paymentSummary")}
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            {pending?.label}
+          </DialogDescription>
+
+          <div className="mt-2 rounded-xl border border-border bg-secondary/40 p-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t("item")}</span>
+              <span className="text-right text-foreground">{pending?.label}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+              <span className="font-display text-sm font-bold text-foreground">{t("total")}</span>
+              <span className="font-display text-lg font-extrabold text-accent">€{pending?.amount}</span>
+            </div>
+          </div>
+
+          <div className="mt-3 flex gap-2">
+            {["iDEAL", "Bancontact", "CC"].map((m) => (
+              <div
+                key={m}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-card py-2 text-[11px] font-medium text-foreground"
+              >
+                <CreditCard className="h-3.5 w-3.5" />
+                {m}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => setPending(null)}
+              className="flex-1 rounded-xl border border-border bg-card py-3 text-xs font-bold text-foreground"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              onClick={completePayment}
+              className="flex-1 rounded-xl bg-primary py-3 text-xs font-bold text-primary-foreground"
+            >
+              {t("payNow")} €{pending?.amount}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success */}
       <Dialog open={confirmation !== null} onOpenChange={(o) => !o && setConfirmation(null)}>
         <DialogContent className="max-w-sm rounded-2xl text-center">
           <motion.div
@@ -274,12 +445,13 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
 
 interface SelectGroupProps {
   label: string;
-  options: string[];
+  options: string[]; // display labels
+  rawOptions: string[]; // values
   value: string;
   onChange: (v: string) => void;
 }
 
-const SelectGroup = ({ label, options, value, onChange }: SelectGroupProps) => (
+const SelectGroup = ({ label, options, rawOptions, value, onChange }: SelectGroupProps) => (
   <div>
     <label className="mb-1 block text-[10px] font-semibold uppercase text-muted-foreground">
       {label}
@@ -290,9 +462,9 @@ const SelectGroup = ({ label, options, value, onChange }: SelectGroupProps) => (
       className="w-full rounded-md border border-border bg-card px-2 py-2 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
     >
       <option value="">—</option>
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
+      {rawOptions.map((raw, i) => (
+        <option key={raw} value={raw}>
+          {options[i]}
         </option>
       ))}
     </select>

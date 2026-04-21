@@ -27,6 +27,17 @@ export const rooms: Room[] = [
     description_nl: "Loge 'De Koolmijn' is een moderne lounge met panoramisch uitzicht op het veld. Perfect voor vergaderingen en kleine evenementen met volledige AV-uitrusting.",
   },
   {
+    id: "loge-mijnwerker",
+    name: "Loge 'De Mijnwerker'",
+    capacity: 10,
+    available: 1,
+    pricePerHour: 22,
+    image: roomLogeImg,
+    featureKeys: ["Wi-Fi", "TV", "Beamer", "Coffee"],
+    description_en: "Spacious VIP lounge for up to 10 guests with premium catering options.",
+    description_nl: "Ruime VIP-lounge voor maximaal 10 gasten met premium cateringopties.",
+  },
+  {
     id: "press-room",
     name: "Persruimte A",
     capacity: 80,
@@ -47,6 +58,17 @@ export const rooms: Room[] = [
     featureKeys: ["Wi-Fi", "Coffee"],
     description_en: "Flexible coworking space overlooking the pitch. Desks, power outlets, and high-speed Wi-Fi included.",
     description_nl: "Flexibele coworking werkplek met uitzicht op het veld. Bureaus, stopcontacten en snelle Wi-Fi inbegrepen.",
+  },
+  {
+    id: "workspace-quiet",
+    name: "Stille Werkplek 'De Schacht'",
+    capacity: 6,
+    available: 4,
+    pricePerHour: 12,
+    image: roomWorkspaceImg,
+    featureKeys: ["Wi-Fi", "Coffee"],
+    description_en: "A quiet focus zone for individual deep work, with monitors at each desk.",
+    description_nl: "Een stille focuszone voor individueel werk, met monitoren aan elk bureau.",
   },
 ];
 

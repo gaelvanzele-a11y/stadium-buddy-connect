@@ -4,16 +4,16 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
-import type { Booking } from "@/components/BookingsView";
+import { useBookings } from "@/contexts/BookingsContext";
 
 interface ParkingMobilityViewProps {
   onBack: () => void;
-  onAddBooking?: (booking: Booking) => void;
   onViewBookings?: () => void;
 }
 
-const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMobilityViewProps) => {
+const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
+  const { addBooking } = useBookings();
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
@@ -52,10 +52,11 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
 
   const todayLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-  const confirmBooking = (info: MobilityBookingInfo) => {
+  const confirmBooking = (info: MobilityBookingInfo, kind: "bike" | "car" | "carpool") => {
     setConfirmation(info);
-    onAddBooking?.({
+    addBooking({
       id: Date.now().toString(),
+      kind,
       roomName: `${info.title} — ${info.itemName}`,
       date: info.date,
       time: info.time,
@@ -70,7 +71,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
       location: t(locationKey),
       date: todayLabel,
       time: "Now",
-    });
+    }, "bike");
   };
 
   const handleReserveCar = (carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
@@ -80,7 +81,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
       location: t(locationKey),
       date: todayLabel,
       time: "14:00 - 16:00",
-    });
+    }, "car");
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
@@ -90,7 +91,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
       location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
       date: t(ride.timeKey),
       time: "",
-    });
+    }, "carpool");
   };
 
   const handleOfferRide = () => {
@@ -100,7 +101,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
       location: "UHasselt → Mijnstadion",
       date: todayLabel,
       time: "",
-    });
+    }, "carpool");
   };
 
   const sections = [
