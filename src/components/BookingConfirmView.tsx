@@ -24,6 +24,13 @@ const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingCo
   const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
   const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
 
+  const addInvitee = () => {
+    const email = inviteEmail.trim();
+    if (!email || invitees.includes(email)) return;
+    setInvitees((prev) => [...prev, email]);
+    setInviteEmail("");
+  };
+
   const handleConfirm = () => {
     onConfirm();
   };
