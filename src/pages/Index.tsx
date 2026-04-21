@@ -86,17 +86,23 @@ const Index = () => {
     reset();
   };
 
-  const handleBookingSuccess = (roomId: string, date: Date, time: string) => {
+  const handleBookingSuccess = (
+    roomId: string,
+    date: Date,
+    time: string,
+    extras?: { car?: { id: string; name: string; location: string } }
+  ) => {
     const room = rooms.find((r) => r.id === roomId);
     if (room) {
       const [hh, mm] = time.split(":").map(Number);
       const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
       const dateISO = format(date, "yyyy-MM-dd");
+      const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
       const newBooking: Booking = {
         id: Date.now().toString(),
         kind: "room",
         roomName: room.name,
-        date: format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy"),
+        date: dateLabel,
         dateISO,
         time: `${time} - ${endTime}`,
         startTime: time,
@@ -104,6 +110,19 @@ const Index = () => {
         location: t("stadiumEntrance"),
       };
       addBooking(newBooking);
+
+      // Add a separate confirmed shared-car booking tied to the same session
+      if (extras?.car) {
+        addBooking({
+          id: `${Date.now()}-car`,
+          kind: "car",
+          roomName: `${t("sharedCarReservation")} — ${extras.car.name}`,
+          date: dateLabel,
+          dateISO,
+          time: `${time} - ${endTime}`,
+          location: extras.car.location,
+        });
+      }
     }
     setView({ type: "bookingSuccess", roomId, date, time });
   };
@@ -152,7 +171,7 @@ const Index = () => {
             date={view.date}
             time={view.time}
             onBack={() => setView({ type: "roomDetail", roomId: view.roomId, date: view.date, time: view.time })}
-            onConfirm={() => handleBookingSuccess(view.roomId, view.date, view.time)}
+            onConfirm={(extras) => handleBookingSuccess(view.roomId, view.date, view.time, extras)}
           />
         );
       case "bookingSuccess":
