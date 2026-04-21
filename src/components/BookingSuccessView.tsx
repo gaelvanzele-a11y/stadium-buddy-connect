@@ -1,18 +1,25 @@
 import { CheckCircle2, Calendar, Clock, QrCode, Navigation, Car } from "lucide-react";
 import { motion } from "framer-motion";
+import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 import { toast } from "sonner";
 
 interface BookingSuccessViewProps {
   roomId: string;
+  date: Date;
+  time: string;
   onBack: () => void;
 }
 
-const BookingSuccessView = ({ roomId, onBack }: BookingSuccessViewProps) => {
-  const { t } = useLanguage();
+const BookingSuccessView = ({ roomId, date, time, onBack }: BookingSuccessViewProps) => {
+  const { t, lang } = useLanguage();
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return null;
+
+  const [hh, mm] = time.split(":").map(Number);
+  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
 
   const handleDirections = () => {
     window.open(
@@ -42,7 +49,7 @@ const BookingSuccessView = ({ roomId, onBack }: BookingSuccessViewProps) => {
       <div className="mt-4 w-full rounded-xl border border-border bg-card p-4 card-shadow text-left">
         <div className="flex items-center gap-3 mb-1">
           <Calendar className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">15 Oct, 14:00-16:00</span>
+          <span className="text-sm font-semibold text-foreground">{dateLabel}, {time}-{endTime}</span>
         </div>
         <div className="flex items-center gap-3">
           <Clock className="h-4 w-4 text-muted-foreground" />

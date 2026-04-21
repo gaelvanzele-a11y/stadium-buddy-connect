@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface RoomListViewProps {
   onBack: () => void;
-  onSelectRoom: (id: string) => void;
+  onSelectRoom: (id: string, date: Date, time: string) => void;
 }
 
 const capacityOptions = ["1-4", "5-10", "10-20", "20+"];
@@ -153,9 +153,12 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                   <p className="text-xs text-muted-foreground">
                     {room.capacity}{t("persons")}, {room.featureKeys.join(", ")} - €{room.pricePerHour}{t("perHour")}
                   </p>
+                  <p className="mt-1 text-[11px] font-semibold text-primary">
+                    {room.available} {t("availableUnits")}
+                  </p>
                 </div>
                 <button
-                  onClick={() => onSelectRoom(room.id)}
+                  onClick={() => date && onSelectRoom(room.id, date, time)}
                   className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
                 >
                   {t("reserve")}

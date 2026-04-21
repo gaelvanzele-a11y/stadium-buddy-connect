@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Zap, Briefcase, Bike, Leaf } from "lucide-react";
+import { Search, Zap, Briefcase, Bike, Leaf, Ticket } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
@@ -17,24 +17,29 @@ import BookingsView, { type Booking } from "@/components/BookingsView";
 import CommunityFeedbackView from "@/components/CommunityFeedbackView";
 import GovernanceDashboard from "@/components/GovernanceDashboard";
 import ChatbotWidget from "@/components/ChatbotWidget";
+import LoginGate from "@/components/LoginGate";
+import TicketshopView from "@/components/TicketshopView";
 import { rooms } from "@/data/rooms";
+import { format } from "date-fns";
 
 export type AppView =
   | { type: "home" }
   | { type: "search" }
   | { type: "bookingsList" }
   | { type: "rooms" }
-  | { type: "roomDetail"; roomId: string }
-  | { type: "bookingConfirm"; roomId: string }
-  | { type: "bookingSuccess"; roomId: string }
+  | { type: "roomDetail"; roomId: string; date: Date; time: string }
+  | { type: "bookingConfirm"; roomId: string; date: Date; time: string }
+  | { type: "bookingSuccess"; roomId: string; date: Date; time: string }
   | { type: "mobility" }
   | { type: "energy" }
   | { type: "account" }
   | { type: "feedback" }
-  | { type: "governance" };
+  | { type: "governance" }
+  | { type: "ticketshop" };
 
 const Index = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const [authedUser, setAuthedUser] = useState<{ name: string; isManager: boolean } | null>(null);
   const [view, setView] = useState<AppView>({ type: "home" });
   const [bottomTab, setBottomTab] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,21 +70,24 @@ const Index = () => {
     if (target === "mobility") { setView({ type: "mobility" }); setBottomTab(""); return; }
     if (target === "energy") { setView({ type: "energy" }); setBottomTab(""); return; }
     if (target === "feedback") { setView({ type: "feedback" }); setBottomTab("feedback"); return; }
+    if (target === "ticketshop") { setView({ type: "ticketshop" }); setBottomTab(""); return; }
   };
 
-  const handleBookingSuccess = (roomId: string) => {
+  const handleBookingSuccess = (roomId: string, date: Date, time: string) => {
     const room = rooms.find((r) => r.id === roomId);
     if (room) {
+      const [hh, mm] = time.split(":").map(Number);
+      const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
       const newBooking: Booking = {
         id: Date.now().toString(),
         roomName: room.name,
-        date: "15 Oct 2026",
-        time: "14:00 - 16:00",
+        date: format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy"),
+        time: `${time} - ${endTime}`,
         location: t("stadiumEntrance"),
       };
       setBookings((prev) => [newBooking, ...prev]);
     }
-    setView({ type: "bookingSuccess", roomId });
+    setView({ type: "bookingSuccess", roomId, date, time });
   };
 
   const handleAddMobilityBooking = (booking: Booking) => {
@@ -89,6 +97,10 @@ const Index = () => {
   const handleGovernanceLogin = () => {
     setView({ type: "governance" });
   };
+
+  // Default date/time used when entering room detail via search (no filters chosen)
+  const defaultDate = new Date();
+  const defaultTime = "14:00";
 
   const categories = [
     {
@@ -112,6 +124,13 @@ const Index = () => {
       bgClass: "bg-energy-leaf",
       action: () => setView({ type: "energy" }),
     },
+    {
+      id: "ticketshop",
+      label: t("ticketshop"),
+      icon: Ticket,
+      bgClass: "bg-primary",
+      action: () => setView({ type: "ticketshop" }),
+    },
   ];
 
   const renderView = () => {
@@ -119,7 +138,7 @@ const Index = () => {
       case "search":
         return (
           <SearchView
-            onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })}
+            onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id, date: defaultDate, time: defaultTime })}
             onGoMobility={() => setView({ type: "mobility" })}
             onGoEnergy={() => setView({ type: "energy" })}
           />
@@ -127,13 +146,32 @@ const Index = () => {
       case "bookingsList":
         return <BookingsView bookings={bookings} />;
       case "rooms":
-        return <RoomListView onBack={goHome} onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id })} />;
+        return (
+          <RoomListView
+            onBack={goHome}
+            onSelectRoom={(id, date, time) => setView({ type: "roomDetail", roomId: id, date, time })}
+          />
+        );
       case "roomDetail":
-        return <RoomDetailView roomId={view.roomId} onBack={() => setView({ type: "rooms" })} onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId })} />;
+        return (
+          <RoomDetailView
+            roomId={view.roomId}
+            onBack={() => setView({ type: "rooms" })}
+            onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId, date: view.date, time: view.time })}
+          />
+        );
       case "bookingConfirm":
-        return <BookingConfirmView roomId={view.roomId} onBack={() => setView({ type: "roomDetail", roomId: view.roomId })} onConfirm={() => handleBookingSuccess(view.roomId)} />;
+        return (
+          <BookingConfirmView
+            roomId={view.roomId}
+            date={view.date}
+            time={view.time}
+            onBack={() => setView({ type: "roomDetail", roomId: view.roomId, date: view.date, time: view.time })}
+            onConfirm={() => handleBookingSuccess(view.roomId, view.date, view.time)}
+          />
+        );
       case "bookingSuccess":
-        return <BookingSuccessView roomId={view.roomId} onBack={goHome} />;
+        return <BookingSuccessView roomId={view.roomId} date={view.date} time={view.time} onBack={goHome} />;
       case "mobility":
         return <ParkingMobilityView onBack={goHome} onAddBooking={handleAddMobilityBooking} onViewBookings={goToBookingsList} />;
       case "energy":
@@ -144,10 +182,25 @@ const Index = () => {
         return <CommunityFeedbackView />;
       case "governance":
         return <GovernanceDashboard />;
+      case "ticketshop":
+        return <TicketshopView onBack={goHome} />;
       default:
         return null;
     }
   };
+
+  // Gate the entire app behind login
+  if (!authedUser) {
+    return (
+      <LoginGate
+        onLogin={(name, isManager) => {
+          setAuthedUser({ name, isManager });
+          if (isManager) setView({ type: "governance" });
+          else setView({ type: "home" });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto min-h-screen max-w-lg bg-background pb-20">
