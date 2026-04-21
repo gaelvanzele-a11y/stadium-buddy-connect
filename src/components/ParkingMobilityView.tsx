@@ -121,14 +121,37 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
     }, "carpool");
   };
 
+  const [offerFrom, setOfferFrom] = useState("UHasselt");
+  const [offerTo, setOfferTo] = useState("Mijnstadion");
+  const [offerSeats, setOfferSeats] = useState(3);
+  const [offerDate, setOfferDate] = useState<Date | undefined>(new Date());
+  const [offerTime, setOfferTime] = useState("08:00");
+
   const handleOfferRide = () => {
-    confirmBooking({
-      title: t("rideBookingTitle"),
-      itemName: t("offerRide"),
-      location: "UHasselt → Mijnstadion",
-      date: todayLabel,
-      time: "",
-    }, "carpool");
+    const oDateISO = offerDate ? format(offerDate, "yyyy-MM-dd") : "";
+    const oDateLabel = offerDate ? format(offerDate, "d MMM yyyy") : todayLabel;
+    const info: MobilityBookingInfo = {
+      title: t("offeredRide"),
+      itemName: `${offerSeats} ${t("seatsAvailable")}`,
+      location: `${offerFrom} → ${offerTo}`,
+      date: oDateLabel,
+      time: offerTime,
+    };
+    setConfirmation(info);
+    addBooking({
+      id: `offer-${Date.now()}`,
+      kind: "carpool",
+      roomName: `${t("offeredRide")}: ${offerFrom} → ${offerTo}`,
+      date: oDateLabel,
+      dateISO: oDateISO,
+      time: offerTime,
+      startTime: offerTime,
+      location: `${offerFrom} → ${offerTo}`,
+      offeredByUser: true,
+      carpoolFrom: offerFrom,
+      carpoolTo: offerTo,
+      carpoolSeats: offerSeats,
+    });
   };
 
   const sections = [
