@@ -410,6 +410,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideFrom")}</label>
                 <input
                   type="text"
+                  value={offerFrom}
+                  onChange={(e) => setOfferFrom(e.target.value)}
                   placeholder="UHasselt"
                   className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
@@ -418,28 +420,72 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                 <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideTo")}</label>
                 <input
                   type="text"
+                  value={offerTo}
+                  onChange={(e) => setOfferTo(e.target.value)}
                   placeholder="Mijnstadion"
                   className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideWhen")}</label>
-                  <input
-                    type="date"
-                    className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("departureDate")}</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="flex w-full items-center gap-1.5 rounded-lg border border-border bg-background py-2 px-3 text-left text-sm text-foreground hover:border-primary">
+                        <CalendarIcon className="h-3.5 w-3.5 text-primary" />
+                        {offerDate ? format(offerDate, "d MMM yyyy") : t("pickADate")}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={offerDate}
+                        onSelect={setOfferDate}
+                        disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-                <div className="w-20">
-                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideSeats")}</label>
-                  <input
-                    type="number"
-                    defaultValue={3}
-                    min={1}
-                    max={7}
-                    className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
+                <div className="w-28">
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("departureTime")}</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="flex w-full items-center gap-1.5 rounded-lg border border-border bg-background py-2 px-3 text-left text-sm text-foreground hover:border-primary">
+                        <Clock className="h-3.5 w-3.5 text-primary" />
+                        {offerTime}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40 p-2" align="start">
+                      <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
+                        {timeOptions.map((tm) => (
+                          <button
+                            key={tm}
+                            onClick={() => setOfferTime(tm)}
+                            className={cn(
+                              "rounded-md px-2 py-1.5 text-xs",
+                              offerTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                            )}
+                          >
+                            {tm}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("rideSeats")}</label>
+                <input
+                  type="number"
+                  value={offerSeats}
+                  onChange={(e) => setOfferSeats(Math.max(1, Math.min(7, Number(e.target.value) || 1)))}
+                  min={1}
+                  max={7}
+                  className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
               </div>
               <button
                 onClick={handleOfferRide}
