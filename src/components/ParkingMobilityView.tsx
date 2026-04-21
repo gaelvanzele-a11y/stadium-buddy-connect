@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck, CircleDot, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
-import { toast } from "sonner";
+import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
+import type { Booking } from "@/components/BookingsView";
 
-const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
+interface ParkingMobilityViewProps {
+  onBack: () => void;
+  onAddBooking?: (booking: Booking) => void;
+  onViewBookings?: () => void;
+}
+
+const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
+  const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
@@ -42,16 +50,57 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
   const totalOccupied = parkingZones.reduce((a, z) => a + z.occupied, 0);
   const totalFree = totalSpaces - totalOccupied;
 
-  const handleRentBike = (bikeId: string, locationKey: string) => {
-    toast.success(`${t("bikeRented")} ${t(locationKey as any)}`);
+  const todayLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+
+  const confirmBooking = (info: MobilityBookingInfo) => {
+    setConfirmation(info);
+    onAddBooking?.({
+      id: Date.now().toString(),
+      roomName: `${info.title} — ${info.itemName}`,
+      date: info.date,
+      time: info.time,
+      location: info.location,
+    });
   };
 
-  const handleReserveCar = (carName: string) => {
-    toast.success(`${t("carReserved")} ${carName}`);
+  const handleRentBike = (bikeId: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
+    confirmBooking({
+      title: t("bikeBookingTitle"),
+      itemName: `${t("bike")} ${bikeId}`,
+      location: t(locationKey),
+      date: todayLabel,
+      time: "Now",
+    });
   };
 
-  const handleRequestRide = () => {
-    toast.success(t("rideRequested"));
+  const handleReserveCar = (carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
+    confirmBooking({
+      title: t("carBookingTitle"),
+      itemName: carName,
+      location: t(locationKey),
+      date: todayLabel,
+      time: "14:00 - 16:00",
+    });
+  };
+
+  const handleRequestRide = (ride: typeof carpoolRides[number]) => {
+    confirmBooking({
+      title: t("rideBookingTitle"),
+      itemName: `${t(ride.driverKey)} (${ride.seats} ${t("rideSeats")})`,
+      location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
+      date: t(ride.timeKey),
+      time: "",
+    });
+  };
+
+  const handleOfferRide = () => {
+    confirmBooking({
+      title: t("rideBookingTitle"),
+      itemName: t("offerRide"),
+      location: "UHasselt → Mijnstadion",
+      date: todayLabel,
+      time: "",
+    });
   };
 
   const sections = [
@@ -202,7 +251,7 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
                 </div>
                 {car.available ? (
                   <button
-                    onClick={() => handleReserveCar(car.name)}
+                    onClick={() => handleReserveCar(car.name, car.locationKey)}
                     className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     {t("reserveCar")}
@@ -262,7 +311,7 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">{ride.seats} {t("rideSeats")}</p>
                       <button
-                        onClick={handleRequestRide}
+                        onClick={() => handleRequestRide(ride)}
                         className="mt-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
                       >
                         {t("requestRide")}
@@ -312,7 +361,7 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
                 </div>
               </div>
               <button
-                onClick={() => toast.success(t("offerRide") + " ✓")}
+                onClick={handleOfferRide}
                 className="w-full rounded-xl bg-primary py-3 font-display text-sm font-bold text-primary-foreground"
               >
                 {t("offerRide")}
@@ -321,6 +370,15 @@ const ParkingMobilityView = ({ onBack }: { onBack: () => void }) => {
           )}
         </motion.div>
       )}
+
+      <MobilityBookingDialog
+        booking={confirmation}
+        onClose={() => setConfirmation(null)}
+        onViewBookings={() => {
+          setConfirmation(null);
+          onViewBookings?.();
+        }}
+      />
     </div>
   );
 };

@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { User, Lock, LogIn, LogOut, Shield, UserPlus } from "lucide-react";
+import { User, Lock, LogIn, LogOut, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AccountViewProps {
   onGovernanceLogin?: () => void;
-  onInvitePeople?: () => void;
 }
 
-const AccountView = ({ onGovernanceLogin, onInvitePeople }: AccountViewProps) => {
+const AccountView = ({ onGovernanceLogin }: AccountViewProps) => {
   const { t } = useLanguage();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
@@ -58,14 +57,6 @@ const AccountView = ({ onGovernanceLogin, onInvitePeople }: AccountViewProps) =>
             </div>
           </div>
         </motion.div>
-
-        <button
-          onClick={() => onInvitePeople?.()}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 font-display text-sm font-bold text-primary-foreground"
-        >
-          <UserPlus className="h-4 w-4" />
-          {t("invitePeople")}
-        </button>
 
         <button
           onClick={() => { setIsLoggedIn(false); setUsername(""); setPassword(""); }}
