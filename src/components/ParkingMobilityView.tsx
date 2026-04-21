@@ -251,7 +251,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
                 </div>
                 {car.available ? (
                   <button
-                    onClick={() => handleReserveCar(car.name)}
+                    onClick={() => handleReserveCar(car.name, car.locationKey)}
                     className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     {t("reserveCar")}
@@ -311,7 +311,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">{ride.seats} {t("rideSeats")}</p>
                       <button
-                        onClick={handleRequestRide}
+                        onClick={() => handleRequestRide(ride)}
                         className="mt-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
                       >
                         {t("requestRide")}
@@ -361,7 +361,7 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
                 </div>
               </div>
               <button
-                onClick={() => toast.success(t("offerRide") + " ✓")}
+                onClick={handleOfferRide}
                 className="w-full rounded-xl bg-primary py-3 font-display text-sm font-bold text-primary-foreground"
               >
                 {t("offerRide")}
@@ -370,6 +370,15 @@ const ParkingMobilityView = ({ onBack, onAddBooking, onViewBookings }: ParkingMo
           )}
         </motion.div>
       )}
+
+      <MobilityBookingDialog
+        booking={confirmation}
+        onClose={() => setConfirmation(null)}
+        onViewBookings={() => {
+          setConfirmation(null);
+          onViewBookings?.();
+        }}
+      />
     </div>
   );
 };
