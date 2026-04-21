@@ -11,7 +11,6 @@ import BookingConfirmView from "@/components/BookingConfirmView";
 import BookingSuccessView from "@/components/BookingSuccessView";
 import ParkingMobilityView from "@/components/ParkingMobilityView";
 import EnergySharingView from "@/components/EnergySharingView";
-import AccountView from "@/components/AccountView";
 import SearchView from "@/components/SearchView";
 import BookingsView, { type Booking } from "@/components/BookingsView";
 import CommunityFeedbackView from "@/components/CommunityFeedbackView";
@@ -19,6 +18,8 @@ import GovernanceDashboard from "@/components/GovernanceDashboard";
 import ChatbotWidget from "@/components/ChatbotWidget";
 import LoginGate from "@/components/LoginGate";
 import TicketshopView from "@/components/TicketshopView";
+import LanguageToggle from "@/components/LanguageToggle";
+import { LogOut } from "lucide-react";
 import { rooms } from "@/data/rooms";
 import { format } from "date-fns";
 
@@ -32,7 +33,6 @@ export type AppView =
   | { type: "bookingSuccess"; roomId: string; date: Date; time: string }
   | { type: "mobility" }
   | { type: "energy" }
-  | { type: "account" }
   | { type: "feedback" }
   | { type: "governance" }
   | { type: "ticketshop" };
@@ -60,8 +60,8 @@ const Index = () => {
     if (tab === "home") setView({ type: "home" });
     if (tab === "search") setView({ type: "search" });
     if (tab === "bookings") setView({ type: "bookingsList" });
-    if (tab === "account") setView({ type: "account" });
     if (tab === "feedback") setView({ type: "feedback" });
+    if (tab === "ticketshop") setView({ type: "ticketshop" });
   };
 
   const handleMenuNavigate = (target: string) => {
@@ -70,7 +70,14 @@ const Index = () => {
     if (target === "mobility") { setView({ type: "mobility" }); setBottomTab(""); return; }
     if (target === "energy") { setView({ type: "energy" }); setBottomTab(""); return; }
     if (target === "feedback") { setView({ type: "feedback" }); setBottomTab("feedback"); return; }
-    if (target === "ticketshop") { setView({ type: "ticketshop" }); setBottomTab(""); return; }
+    if (target === "ticketshop") { setView({ type: "ticketshop" }); setBottomTab("ticketshop"); return; }
+  };
+
+  const handleLogout = () => {
+    setAuthedUser(null);
+    setView({ type: "home" });
+    setBottomTab("home");
+    setBookings([]);
   };
 
   const handleBookingSuccess = (roomId: string, date: Date, time: string) => {
@@ -94,43 +101,14 @@ const Index = () => {
     setBookings((prev) => [booking, ...prev]);
   };
 
-  const handleGovernanceLogin = () => {
-    setView({ type: "governance" });
-  };
-
-  // Default date/time used when entering room detail via search (no filters chosen)
   const defaultDate = new Date();
   const defaultTime = "14:00";
 
   const categories = [
-    {
-      id: "workspaces",
-      label: t("workspaces"),
-      icon: Briefcase,
-      bgClass: "bg-accent",
-      action: () => setView({ type: "rooms" }),
-    },
-    {
-      id: "mobility",
-      label: t("sharedMobility"),
-      icon: Bike,
-      bgClass: "bg-mobility-blue",
-      action: () => setView({ type: "mobility" }),
-    },
-    {
-      id: "energy",
-      label: t("neighborhoodEnergy"),
-      icon: Leaf,
-      bgClass: "bg-energy-leaf",
-      action: () => setView({ type: "energy" }),
-    },
-    {
-      id: "ticketshop",
-      label: t("ticketshop"),
-      icon: Ticket,
-      bgClass: "bg-primary",
-      action: () => setView({ type: "ticketshop" }),
-    },
+    { id: "workspaces", label: t("workspaces"), icon: Briefcase, bgClass: "bg-accent", action: () => setView({ type: "rooms" }) },
+    { id: "mobility", label: t("sharedMobility"), icon: Bike, bgClass: "bg-mobility-blue", action: () => setView({ type: "mobility" }) },
+    { id: "energy", label: t("neighborhoodEnergy"), icon: Leaf, bgClass: "bg-energy-leaf", action: () => setView({ type: "energy" }) },
+    { id: "ticketshop", label: t("ticketshop"), icon: Ticket, bgClass: "bg-primary", action: () => { setView({ type: "ticketshop" }); setBottomTab("ticketshop"); } },
   ];
 
   const renderView = () => {
@@ -176,8 +154,6 @@ const Index = () => {
         return <ParkingMobilityView onBack={goHome} onAddBooking={handleAddMobilityBooking} onViewBookings={goToBookingsList} />;
       case "energy":
         return <EnergySharingView onBack={goHome} />;
-      case "account":
-        return <AccountView onGovernanceLogin={handleGovernanceLogin} />;
       case "feedback":
         return <CommunityFeedbackView />;
       case "governance":
@@ -202,10 +178,36 @@ const Index = () => {
     );
   }
 
+  // Hub manager: KPI dashboard only — no nav, no menu, no chatbot
+  if (authedUser.isManager) {
+    return (
+      <div className="mx-auto min-h-screen max-w-lg bg-background pb-10">
+        <div className="flex items-center justify-between px-5 pt-4 pb-2">
+          <LanguageToggle />
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-xs font-bold text-destructive transition-colors hover:bg-muted"
+            aria-label={t("logout")}
+          >
+            <LogOut className="h-4 w-4" />
+            {t("logout")}
+          </button>
+        </div>
+        <GovernanceDashboard />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto min-h-screen max-w-lg bg-background pb-20">
       <TopBar onHomeClick={() => setMenuOpen(true)} showMenu={view.type !== "home"} />
-      <MenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={handleMenuNavigate} />
+      <MenuOverlay
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onNavigate={handleMenuNavigate}
+        onLogout={handleLogout}
+        userName={authedUser.name}
+      />
 
       <AnimatePresence mode="wait">
         {view.type === "home" ? (
@@ -289,7 +291,7 @@ const Index = () => {
       </AnimatePresence>
 
       <ChatbotWidget />
-      <BottomNav activeTab={bottomTab} onTabChange={handleBottomTab} />
+      <BottomNav activeTab={bottomTab} onTabChange={handleBottomTab} isManager={authedUser.isManager} />
     </div>
   );
 };

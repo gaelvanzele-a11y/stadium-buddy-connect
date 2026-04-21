@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Ticket, CreditCard, Plus, Minus, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Ticket, CreditCard, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -25,11 +25,22 @@ const events: SportEvent[] = [
 
 const topUpOptions = [10, 20, 50, 100];
 
+// Stadium layout: sections, rows, seats per row
+const sections = ["A", "B", "C", "D"];
+const rows = ["1", "2", "3", "4", "5", "6", "7", "8"];
+const seatsPerRow = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+
+interface SeatSelection {
+  section: string;
+  row: string;
+  seat: string;
+}
+
 const TicketshopView = ({ onBack }: TicketshopViewProps) => {
   const { t } = useLanguage();
   const [tab, setTab] = useState<"tickets" | "card">("tickets");
   const [sportFilter, setSportFilter] = useState<"all" | "football" | "hockey">("all");
-  const [seats, setSeats] = useState<Record<string, number>>({});
+  const [selections, setSelections] = useState<Record<string, SeatSelection>>({});
   const [topUp, setTopUp] = useState<number>(20);
   const [confirmation, setConfirmation] = useState<string | null>(null);
 
@@ -37,20 +48,29 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
     (e) => sportFilter === "all" || e.sportKey === sportFilter
   );
 
-  const setSeatCount = (id: string, delta: number) => {
-    setSeats((prev) => {
-      const cur = prev[id] || 0;
-      const next = Math.max(0, Math.min(8, cur + delta));
-      return { ...prev, [id]: next };
-    });
+  const updateSelection = (eventId: string, field: keyof SeatSelection, value: string) => {
+    setSelections((prev) => ({
+      ...prev,
+      [eventId]: {
+        section: prev[eventId]?.section || "",
+        row: prev[eventId]?.row || "",
+        seat: prev[eventId]?.seat || "",
+        [field]: value,
+      },
+    }));
   };
 
   const buyTicket = (event: SportEvent) => {
-    const count = seats[event.id] || 1;
+    const sel = selections[event.id];
+    if (!sel || !sel.section || !sel.row || !sel.seat) return;
     setConfirmation(
-      `${count} × ${t(event.matchKey as never)} — €${count * event.price}`
+      `${t(event.matchKey as never)} — ${t("section")} ${sel.section}, ${t("row")} ${sel.row}, ${t("seat")} ${sel.seat} — €${event.price}`
     );
-    setSeats((prev) => ({ ...prev, [event.id]: 0 }));
+    setSelections((prev) => {
+      const copy = { ...prev };
+      delete copy[event.id];
+      return copy;
+    });
   };
 
   const topUpCard = () => {
@@ -97,7 +117,6 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
 
       {tab === "tickets" && (
         <div className="mt-5">
-          {/* Sport filter */}
           <div className="mb-4 flex gap-2">
             {(["all", "football", "hockey"] as const).map((s) => (
               <button
@@ -116,7 +135,8 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
 
           <div className="space-y-3">
             {filteredEvents.map((event, i) => {
-              const count = seats[event.id] || 0;
+              const sel = selections[event.id] || { section: "", row: "", seat: "" };
+              const ready = sel.section && sel.row && sel.seat;
               return (
                 <motion.div
                   key={event.id}
@@ -125,7 +145,7 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
                   transition={{ delay: i * 0.05 }}
                   className="rounded-xl bg-card p-4 card-shadow"
                 >
-                  <div className="mb-2 flex items-start justify-between">
+                  <div className="mb-3 flex items-start justify-between">
                     <div>
                       <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
                         {t(event.sportKey)}
@@ -140,37 +160,45 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
                     </p>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSeatCount(event.id, -1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-foreground"
-                        aria-label="Decrease"
-                      >
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="w-6 text-center text-sm font-semibold text-foreground">
-                        {count}
-                      </span>
-                      <button
-                        onClick={() => setSeatCount(event.id, 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-foreground"
-                        aria-label="Increase"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="ml-1 text-[11px] text-muted-foreground">
-                        {t("seats")}
-                      </span>
+                  {/* Seat selection */}
+                  <div className="mt-3 space-y-2 rounded-lg border border-border bg-background p-3">
+                    <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+                      {t("selectSeat")}
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <SelectGroup
+                        label={t("section")}
+                        options={sections}
+                        value={sel.section}
+                        onChange={(v) => updateSelection(event.id, "section", v)}
+                      />
+                      <SelectGroup
+                        label={t("row")}
+                        options={rows}
+                        value={sel.row}
+                        onChange={(v) => updateSelection(event.id, "row", v)}
+                      />
+                      <SelectGroup
+                        label={t("seat")}
+                        options={seatsPerRow}
+                        value={sel.seat}
+                        onChange={(v) => updateSelection(event.id, "seat", v)}
+                      />
                     </div>
-                    <button
-                      onClick={() => buyTicket(event)}
-                      disabled={count === 0}
-                      className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-40"
-                    >
-                      {t("buy")}
-                    </button>
+                    {ready && (
+                      <p className="text-[11px] text-primary">
+                        {t("selectedSeat")}: {t("section")} {sel.section}, {t("row")} {sel.row}, {t("seat")} {sel.seat}
+                      </p>
+                    )}
                   </div>
+
+                  <button
+                    onClick={() => buyTicket(event)}
+                    disabled={!ready}
+                    className="mt-3 w-full rounded-lg bg-primary py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-40"
+                  >
+                    {ready ? t("buy") : t("pickSeatFirst")}
+                  </button>
                 </motion.div>
               );
             })}
@@ -218,7 +246,6 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
         </div>
       )}
 
-      {/* Confirmation modal */}
       <Dialog open={confirmation !== null} onOpenChange={(o) => !o && setConfirmation(null)}>
         <DialogContent className="max-w-sm rounded-2xl text-center">
           <motion.div
@@ -244,5 +271,32 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
     </div>
   );
 };
+
+interface SelectGroupProps {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+}
+
+const SelectGroup = ({ label, options, value, onChange }: SelectGroupProps) => (
+  <div>
+    <label className="mb-1 block text-[10px] font-semibold uppercase text-muted-foreground">
+      {label}
+    </label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full rounded-md border border-border bg-card px-2 py-2 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+    >
+      <option value="">—</option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 export default TicketshopView;
