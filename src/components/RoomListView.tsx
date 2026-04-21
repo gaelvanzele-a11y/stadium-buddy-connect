@@ -102,6 +102,12 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
               onSelect={setDate}
               disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
               initialFocus
+              modifiersClassNames={{
+                today:
+                  date && date.toDateString() !== new Date().toDateString()
+                    ? "!bg-transparent !text-foreground"
+                    : "",
+              }}
               className={cn("p-3 pointer-events-auto")}
             />
           </PopoverContent>
@@ -138,7 +144,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
           <p className="py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>
         ) : (
           filteredRooms.map((room, i) => {
-            const taken = dateISO && isRoomSlotBooked(room.id, dateISO, time);
+            const taken = !!(dateISO && isRoomSlotBooked(room.id, dateISO, time));
             return (
               <motion.div
                 key={room.id}
@@ -146,8 +152,8 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
                 className={cn(
-                  "overflow-hidden rounded-xl bg-card card-shadow",
-                  taken && "opacity-60"
+                  "overflow-hidden rounded-xl bg-card card-shadow transition-all",
+                  taken && "pointer-events-none grayscale opacity-50"
                 )}
               >
                 <img
@@ -162,13 +168,16 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                     <p className="text-xs text-muted-foreground">
                       {room.capacity}{t("persons")}, {room.featureKeys.join(", ")} - €{room.pricePerHour}{t("perHour")}
                     </p>
-                    <p className="mt-1 text-[11px] font-semibold text-primary">
-                      {taken ? t("bookedAlready") : `${room.available} ${t("availableUnits")}`}
+                    <p className={cn(
+                      "mt-1 text-[11px] font-semibold",
+                      taken ? "text-destructive" : "text-primary"
+                    )}>
+                      {taken ? t("reservedSlot") : t("available_short")}
                     </p>
                   </div>
                   <button
                     onClick={() => date && !taken && onSelectRoom(room.id, date, time)}
-                    disabled={!!taken}
+                    disabled={taken}
                     className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:bg-muted disabled:text-muted-foreground"
                   >
                     {taken ? t("notAvailable") : t("reserve")}
