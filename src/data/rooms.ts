@@ -6,6 +6,7 @@ export interface Room {
   id: string;
   name: string;
   capacity: number;
+  available: number;
   pricePerHour: number;
   image: string;
   featureKeys: string[];
@@ -18,16 +19,18 @@ export const rooms: Room[] = [
     id: "loge-koolmijn",
     name: "Loge 'De Koolmijn'",
     capacity: 4,
+    available: 5,
     pricePerHour: 15,
     image: roomLogeImg,
     featureKeys: ["Wi-Fi", "TV", "Beamer", "Coffee"],
     description_en: "Loge 'De Koolmijn' is a modern lounge offering a panoramic view of the pitch. Perfect for meetings and small events with full AV equipment.",
-    description_nl: "Loge 'De Koolmijn' als nax modern loge, vont oller van trwin de inoket modervanmen. Zonlien kaas aan wet een festanre constltination.",
+    description_nl: "Loge 'De Koolmijn' is een moderne lounge met panoramisch uitzicht op het veld. Perfect voor vergaderingen en kleine evenementen met volledige AV-uitrusting.",
   },
   {
     id: "press-room",
     name: "Persruimte A",
     capacity: 80,
+    available: 1,
     pricePerHour: 25,
     image: roomPressImg,
     featureKeys: ["Wi-Fi", "Beamer", "Coffee"],
@@ -38,6 +41,7 @@ export const rooms: Room[] = [
     id: "workspace",
     name: "Werkplek Stadion",
     capacity: 12,
+    available: 8,
     pricePerHour: 10,
     image: roomWorkspaceImg,
     featureKeys: ["Wi-Fi", "Coffee"],
