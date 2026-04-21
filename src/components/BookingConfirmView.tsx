@@ -1,21 +1,29 @@
 import { ArrowLeft, Calendar, Clock, CreditCard, UserPlus, X, Mail } from "lucide-react";
 import { useState } from "react";
+import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 
 interface BookingConfirmViewProps {
   roomId: string;
+  date: Date;
+  time: string;
   onBack: () => void;
   onConfirm: () => void;
 }
 
-const BookingConfirmView = ({ roomId, onBack, onConfirm }: BookingConfirmViewProps) => {
-  const { t } = useLanguage();
+const BookingConfirmView = ({ roomId, date, time, onBack, onConfirm }: BookingConfirmViewProps) => {
+  const { t, lang } = useLanguage();
   const [addMobility, setAddMobility] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [invitees, setInvitees] = useState<string[]>([]);
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return null;
+
+  // Compute end time (2-hour slot)
+  const [hh, mm] = time.split(":").map(Number);
+  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
 
   const addInvitee = () => {
     const email = inviteEmail.trim();
@@ -38,7 +46,7 @@ const BookingConfirmView = ({ roomId, onBack, onConfirm }: BookingConfirmViewPro
       <div className="mb-5 rounded-xl border border-border bg-card p-4 card-shadow">
         <div className="flex items-center gap-3 mb-2">
           <Calendar className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">15 Oct, 14:00-16:00</span>
+          <span className="text-sm font-semibold text-foreground">{dateLabel}, {time}-{endTime}</span>
         </div>
         <div className="flex items-center gap-3">
           <Clock className="h-4 w-4 text-muted-foreground" />
