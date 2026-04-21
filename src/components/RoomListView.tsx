@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
+import { useBookings } from "@/contexts/BookingsContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -13,21 +14,29 @@ interface RoomListViewProps {
   onSelectRoom: (id: string, date: Date, time: string) => void;
 }
 
-const capacityOptions = ["1-4", "5-10", "10-20", "20+"];
+const capacityOptions = ["any", "1-4", "5-10", "10-20", "20+"];
 const timeOptions = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
 
 const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
   const { t } = useLanguage();
-  const [capacity, setCapacity] = useState("1-4");
+  const { isRoomSlotBooked } = useBookings();
+  const [capacity, setCapacity] = useState("any");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState("14:00");
   const [search, setSearch] = useState("");
 
-  const capacityMax = capacity === "1-4" ? 4 : capacity === "5-10" ? 10 : capacity === "10-20" ? 20 : 999;
-  const capacityMin = capacity === "1-4" ? 1 : capacity === "5-10" ? 5 : capacity === "10-20" ? 10 : 20;
+  const capacityRange = (() => {
+    if (capacity === "any") return [0, Infinity] as const;
+    if (capacity === "1-4") return [1, 4] as const;
+    if (capacity === "5-10") return [5, 10] as const;
+    if (capacity === "10-20") return [10, 20] as const;
+    return [20, Infinity] as const;
+  })();
+
+  const dateISO = date ? format(date, "yyyy-MM-dd") : "";
 
   const filteredRooms = rooms.filter((r) => {
-    const matchesCapacity = r.capacity >= capacityMin && r.capacity <= capacityMax;
+    const matchesCapacity = r.capacity >= capacityRange[0] && r.capacity <= capacityRange[1];
     const matchesSearch = !search || r.name.toLowerCase().includes(search.toLowerCase());
     return matchesCapacity && matchesSearch;
   });
@@ -53,9 +62,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
         />
       </div>
 
-      {/* Interactive filters */}
       <div className="mb-5 flex gap-2 overflow-x-auto text-xs">
-        {/* Capacity */}
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
@@ -81,7 +88,6 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
           </PopoverContent>
         </Popover>
 
-        {/* Date */}
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
@@ -101,7 +107,6 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
           </PopoverContent>
         </Popover>
 
-        {/* Time */}
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
@@ -128,44 +133,50 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
         </Popover>
       </div>
 
-      {/* Room cards */}
       <div className="space-y-4 pb-24">
         {filteredRooms.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>
         ) : (
-          filteredRooms.map((room, i) => (
-            <motion.div
-              key={room.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="overflow-hidden rounded-xl bg-card card-shadow"
-            >
-              <img
-                src={room.image}
-                alt={room.name}
-                className="h-40 w-full object-cover"
-                loading="lazy"
-              />
-              <div className="flex items-center justify-between p-4">
-                <div>
-                  <h3 className="font-display text-sm font-bold text-foreground">{room.name}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {room.capacity}{t("persons")}, {room.featureKeys.join(", ")} - €{room.pricePerHour}{t("perHour")}
-                  </p>
-                  <p className="mt-1 text-[11px] font-semibold text-primary">
-                    {room.available} {t("availableUnits")}
-                  </p>
+          filteredRooms.map((room, i) => {
+            const taken = dateISO && isRoomSlotBooked(room.id, dateISO, time);
+            return (
+              <motion.div
+                key={room.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className={cn(
+                  "overflow-hidden rounded-xl bg-card card-shadow",
+                  taken && "opacity-60"
+                )}
+              >
+                <img
+                  src={room.image}
+                  alt={room.name}
+                  className="h-40 w-full object-cover"
+                  loading="lazy"
+                />
+                <div className="flex items-center justify-between p-4">
+                  <div>
+                    <h3 className="font-display text-sm font-bold text-foreground">{room.name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {room.capacity}{t("persons")}, {room.featureKeys.join(", ")} - €{room.pricePerHour}{t("perHour")}
+                    </p>
+                    <p className="mt-1 text-[11px] font-semibold text-primary">
+                      {taken ? t("bookedAlready") : `${room.available} ${t("availableUnits")}`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => date && !taken && onSelectRoom(room.id, date, time)}
+                    disabled={!!taken}
+                    className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:bg-muted disabled:text-muted-foreground"
+                  >
+                    {taken ? t("notAvailable") : t("reserve")}
+                  </button>
                 </div>
-                <button
-                  onClick={() => date && onSelectRoom(room.id, date, time)}
-                  className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
-                >
-                  {t("reserve")}
-                </button>
-              </div>
-            </motion.div>
-          ))
+              </motion.div>
+            );
+          })
         )}
       </div>
     </div>
