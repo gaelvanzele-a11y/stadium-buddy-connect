@@ -207,42 +207,57 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       {/* BIKES SECTION */}
       {activeSection === "bikes" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
           <div className="space-y-2">
-            {bikes.map((bike, i) => (
-              <motion.div
-                key={bike.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
-                className="flex items-center justify-between rounded-xl bg-card p-3 card-shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
-                    <Bike className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
-                    <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-1 text-xs">
-                    <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
-                    <span className="text-muted-foreground">{bike.battery}%</span>
-                  </div>
-                  {bike.status === "available" ? (
-                    <button
-                      onClick={() => handleRentBike(bike.id, bike.locationKey)}
-                      className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      {t("rent")}
-                    </button>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground">{bike.status === "in-use" ? t("inUse") : t("charging")}</span>
+            {bikes.map((bike, i) => {
+              const slotTaken =
+                bike.status !== "available" ||
+                isMobilitySlotBooked("bike", bike.id, dateISO, time);
+              return (
+                <motion.div
+                  key={bike.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.04 }}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl bg-card p-3 card-shadow transition-all",
+                    slotTaken && "grayscale opacity-50"
                   )}
-                </div>
-              </motion.div>
-            ))}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
+                      <Bike className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
+                      <p className="text-[11px] text-muted-foreground">{t(bike.locationKey)}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1 text-xs">
+                      <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
+                      <span className="text-muted-foreground">{bike.battery}%</span>
+                    </div>
+                    {!slotTaken ? (
+                      <button
+                        onClick={() => handleRentBike(bike.id, bike.locationKey)}
+                        className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        {t("rent")}
+                      </button>
+                    ) : (
+                      <span className="text-[11px] font-semibold text-destructive">
+                        {bike.status === "in-use"
+                          ? t("inUse")
+                          : bike.status === "charging"
+                            ? t("charging")
+                            : t("reservedSlot")}
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       )}
@@ -253,38 +268,46 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
           <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
             <Car className="h-4 w-4 text-primary" /> {t("sharedCars")}
           </h3>
+          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
           <div className="space-y-2">
-            {sharedCars.map((car, i) => (
-              <motion.div
-                key={car.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                className="flex items-center justify-between rounded-xl bg-card p-4 card-shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                    <Car className="h-5 w-5 text-primary" />
+            {sharedCars.map((car, i) => {
+              const slotTaken =
+                !car.available || isMobilitySlotBooked("car", car.id, dateISO, time);
+              return (
+                <motion.div
+                  key={car.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all",
+                    slotTaken && "grayscale opacity-50"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                      <Car className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{car.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{t(car.locationKey)} · {car.type}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{car.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{t(car.locationKey)} · {car.type}</p>
-                  </div>
-                </div>
-                {car.available ? (
-                  <button
-                    onClick={() => handleReserveCar(car.name, car.locationKey)}
-                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                  >
-                    {t("reserveCar")}
-                  </button>
-                ) : (
-                  <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
-                    {t("occupied")}
-                  </span>
-                )}
-              </motion.div>
-            ))}
+                  {!slotTaken ? (
+                    <button
+                      onClick={() => handleReserveCar(car.id, car.name, car.locationKey)}
+                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      {t("reserveCar")}
+                    </button>
+                  ) : (
+                    <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
+                      {t("reservedSlot")}
+                    </span>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       )}
