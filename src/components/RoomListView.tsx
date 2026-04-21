@@ -11,18 +11,24 @@ import { cn } from "@/lib/utils";
 
 interface RoomListViewProps {
   onBack: () => void;
-  onSelectRoom: (id: string, date: Date, time: string) => void;
+  onSelectRoom: (id: string, date: Date, startTime: string, endTime: string) => void;
 }
 
 const capacityOptions = ["any", "1-4", "5-10", "10-20", "20+"];
-const timeOptions = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+const hourOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+
+const toMin = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
 
 const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
   const { t } = useLanguage();
   const { isRoomSlotBooked } = useBookings();
   const [capacity, setCapacity] = useState("any");
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [time, setTime] = useState("14:00");
+  const [startTime, setStartTime] = useState("14:00");
+  const [endTime, setEndTime] = useState("16:00");
   const [search, setSearch] = useState("");
 
   const capacityRange = (() => {
@@ -34,6 +40,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
   })();
 
   const dateISO = date ? format(date, "yyyy-MM-dd") : "";
+  const validRange = toMin(endTime) > toMin(startTime);
 
   const filteredRooms = rooms.filter((r) => {
     const matchesCapacity = r.capacity >= capacityRange[0] && r.capacity <= capacityRange[1];
@@ -62,7 +69,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
         />
       </div>
 
-      <div className="mb-5 flex gap-2 overflow-x-auto text-xs">
+      <div className="mb-3 flex gap-2 overflow-x-auto text-xs">
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
@@ -112,23 +119,31 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
             />
           </PopoverContent>
         </Popover>
+      </div>
 
+      <div className="mb-5 flex gap-2 overflow-x-auto text-xs">
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
               <Clock className="h-3.5 w-3.5 text-primary" />
-              {t("time")}: {time}
+              {t("from")}: {startTime}
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-32 p-2" align="start">
-            <div className="grid grid-cols-2 gap-1">
-              {timeOptions.map((tm) => (
+          <PopoverContent className="w-40 p-2" align="start">
+            <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
+              {hourOptions.slice(0, -1).map((tm) => (
                 <button
                   key={tm}
-                  onClick={() => setTime(tm)}
+                  onClick={() => {
+                    setStartTime(tm);
+                    if (toMin(endTime) <= toMin(tm)) {
+                      const next = hourOptions[hourOptions.indexOf(tm) + 1];
+                      if (next) setEndTime(next);
+                    }
+                  }}
                   className={cn(
-                    "rounded-md px-2 py-2 text-sm",
-                    time === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                    "rounded-md px-2 py-1.5 text-xs",
+                    startTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
                   )}
                 >
                   {tm}
@@ -137,14 +152,46 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
             </div>
           </PopoverContent>
         </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
+              <Clock className="h-3.5 w-3.5 text-primary" />
+              {t("to")}: {endTime}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-2" align="start">
+            <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
+              {hourOptions
+                .filter((tm) => toMin(tm) > toMin(startTime))
+                .map((tm) => (
+                  <button
+                    key={tm}
+                    onClick={() => setEndTime(tm)}
+                    className={cn(
+                      "rounded-md px-2 py-1.5 text-xs",
+                      endTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                    )}
+                  >
+                    {tm}
+                  </button>
+                ))}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
+
+      {!validRange && (
+        <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
+      )}
 
       <div className="space-y-4 pb-24">
         {filteredRooms.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>
         ) : (
           filteredRooms.map((room, i) => {
-            const taken = !!(dateISO && isRoomSlotBooked(room.id, dateISO, time));
+            const taken = !validRange || !!(dateISO && isRoomSlotBooked(room.id, dateISO, startTime, endTime));
+            const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
             return (
               <motion.div
                 key={room.id}
@@ -172,11 +219,11 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                       "mt-1 text-[11px] font-semibold",
                       taken ? "text-destructive" : "text-primary"
                     )}>
-                      {taken ? t("reservedSlot") : t("available_short")}
+                      {taken ? t("reservedSlot") : `${t("available_short")} · ${hours} ${t("hours")}`}
                     </p>
                   </div>
                   <button
-                    onClick={() => date && !taken && onSelectRoom(room.id, date, time)}
+                    onClick={() => date && !taken && onSelectRoom(room.id, date, startTime, endTime)}
                     disabled={taken}
                     className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:bg-muted disabled:text-muted-foreground"
                   >

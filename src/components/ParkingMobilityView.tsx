@@ -15,7 +15,12 @@ interface ParkingMobilityViewProps {
   onViewBookings?: () => void;
 }
 
-const timeOptions = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+
+const toMin = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
 
 const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
@@ -24,7 +29,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [time, setTime] = useState("14:00");
+  const [startTime, setStartTime] = useState("14:00");
+  const [endTime, setEndTime] = useState("16:00");
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
@@ -62,14 +68,13 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
 
   const dateISO = date ? format(date, "yyyy-MM-dd") : "";
   const dateLabel = date ? format(date, "d MMM yyyy") : todayLabel;
-  const [hh, mm] = time.split(":").map(Number);
-  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-  const slotLabel = `${time} - ${endTime}`;
+  const validRange = toMin(endTime) > toMin(startTime);
+  const slotLabel = `${startTime} - ${endTime}`;
 
   const confirmBooking = (
     info: MobilityBookingInfo,
     kind: "bike" | "car" | "carpool",
-    extra?: { itemId?: string; dateISO?: string; startTime?: string }
+    extra?: { itemId?: string; dateISO?: string; startTime?: string; endTime?: string }
   ) => {
     setConfirmation(info);
     addBooking({
@@ -80,6 +85,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       dateISO: extra?.dateISO,
       time: info.time,
       startTime: extra?.startTime,
+      endTime: extra?.endTime,
       itemId: extra?.itemId,
       location: info.location,
     });
@@ -92,7 +98,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "bike", { itemId: bikeId, dateISO, startTime: time });
+    }, "bike", { itemId: bikeId, dateISO, startTime, endTime });
   };
 
   const handleReserveCar = (carId: string, carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
@@ -102,7 +108,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "car", { itemId: carId, dateISO, startTime: time });
+    }, "car", { itemId: carId, dateISO, startTime, endTime });
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
@@ -207,12 +213,16 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       {/* BIKES SECTION */}
       {activeSection === "bikes" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          {!validRange && (
+            <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
+          )}
           <div className="space-y-2">
             {bikes.map((bike, i) => {
               const slotTaken =
+                !validRange ||
                 bike.status !== "available" ||
-                isMobilitySlotBooked("bike", bike.id, dateISO, time);
+                isMobilitySlotBooked("bike", bike.id, dateISO, startTime, endTime);
               return (
                 <motion.div
                   key={bike.id}
@@ -268,11 +278,14 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
           <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
             <Car className="h-4 w-4 text-primary" /> {t("sharedCars")}
           </h3>
-          <DateTimeFilter date={date} setDate={setDate} time={time} setTime={setTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          {!validRange && (
+            <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
+          )}
           <div className="space-y-2">
             {sharedCars.map((car, i) => {
               const slotTaken =
-                !car.available || isMobilitySlotBooked("car", car.id, dateISO, time);
+                !validRange || !car.available || isMobilitySlotBooked("car", car.id, dateISO, startTime, endTime);
               return (
                 <motion.div
                   key={car.id}
@@ -431,13 +444,15 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
 interface DateTimeFilterProps {
   date: Date | undefined;
   setDate: (d: Date | undefined) => void;
-  time: string;
-  setTime: (t: string) => void;
+  startTime: string;
+  setStartTime: (t: string) => void;
+  endTime: string;
+  setEndTime: (t: string) => void;
   t: (k: string) => string;
 }
 
-const DateTimeFilter = ({ date, setDate, time, setTime, t }: DateTimeFilterProps) => (
-  <div className="mb-4 flex gap-2 overflow-x-auto text-xs">
+const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEndTime, t }: DateTimeFilterProps) => (
+  <div className="mb-4 flex flex-wrap gap-2 text-xs">
     <Popover>
       <PopoverTrigger asChild>
         <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
@@ -467,23 +482,56 @@ const DateTimeFilter = ({ date, setDate, time, setTime, t }: DateTimeFilterProps
       <PopoverTrigger asChild>
         <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
           <Clock className="h-3.5 w-3.5 text-primary" />
-          {t("time")}: {time}
+          {t("from")}: {startTime}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-32 p-2" align="start">
-        <div className="grid grid-cols-2 gap-1">
-          {timeOptions.map((tm) => (
+      <PopoverContent className="w-40 p-2" align="start">
+        <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
+          {timeOptions.slice(0, -1).map((tm) => (
             <button
               key={tm}
-              onClick={() => setTime(tm)}
+              onClick={() => {
+                setStartTime(tm);
+                if (toMin(endTime) <= toMin(tm)) {
+                  const next = timeOptions[timeOptions.indexOf(tm) + 1];
+                  if (next) setEndTime(next);
+                }
+              }}
               className={cn(
-                "rounded-md px-2 py-2 text-sm",
-                time === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                "rounded-md px-2 py-1.5 text-xs",
+                startTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
               )}
             >
               {tm}
             </button>
           ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
+          <Clock className="h-3.5 w-3.5 text-primary" />
+          {t("to")}: {endTime}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-40 p-2" align="start">
+        <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
+          {timeOptions
+            .filter((tm) => toMin(tm) > toMin(startTime))
+            .map((tm) => (
+              <button
+                key={tm}
+                onClick={() => setEndTime(tm)}
+                className={cn(
+                  "rounded-md px-2 py-1.5 text-xs",
+                  endTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                )}
+              >
+                {tm}
+              </button>
+            ))}
         </div>
       </PopoverContent>
     </Popover>

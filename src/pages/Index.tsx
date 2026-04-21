@@ -29,9 +29,9 @@ export type AppView =
   | { type: "search" }
   | { type: "bookingsList" }
   | { type: "rooms" }
-  | { type: "roomDetail"; roomId: string; date: Date; time: string }
-  | { type: "bookingConfirm"; roomId: string; date: Date; time: string }
-  | { type: "bookingSuccess"; roomId: string; date: Date; time: string }
+  | { type: "roomDetail"; roomId: string; date: Date; startTime: string; endTime: string }
+  | { type: "bookingConfirm"; roomId: string; date: Date; startTime: string; endTime: string }
+  | { type: "bookingSuccess"; roomId: string; date: Date; startTime: string; endTime: string }
   | { type: "mobility" }
   | { type: "energy" }
   | { type: "feedback" }
@@ -86,11 +86,9 @@ const Index = () => {
     reset();
   };
 
-  const handleBookingSuccess = (roomId: string, date: Date, time: string) => {
+  const handleBookingSuccess = (roomId: string, date: Date, startTime: string, endTime: string) => {
     const room = rooms.find((r) => r.id === roomId);
     if (room) {
-      const [hh, mm] = time.split(":").map(Number);
-      const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
       const dateISO = format(date, "yyyy-MM-dd");
       const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
       const newBooking: Booking = {
@@ -99,18 +97,20 @@ const Index = () => {
         roomName: room.name,
         date: dateLabel,
         dateISO,
-        time: `${time} - ${endTime}`,
-        startTime: time,
+        time: `${startTime} - ${endTime}`,
+        startTime,
+        endTime,
         roomId,
         location: t("stadiumEntrance"),
       };
       addBooking(newBooking);
     }
-    setView({ type: "bookingSuccess", roomId, date, time });
+    setView({ type: "bookingSuccess", roomId, date, startTime, endTime });
   };
 
   const defaultDate = new Date();
-  const defaultTime = "14:00";
+  const defaultStart = "14:00";
+  const defaultEnd = "16:00";
 
   const categories = [
     { id: "workspaces", label: t("workspaces"), icon: Briefcase, bgClass: "bg-accent", action: () => setView({ type: "rooms" }) },
@@ -124,7 +124,7 @@ const Index = () => {
       case "search":
         return (
           <SearchView
-            onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id, date: defaultDate, time: defaultTime })}
+            onSelectRoom={(id) => setView({ type: "roomDetail", roomId: id, date: defaultDate, startTime: defaultStart, endTime: defaultEnd })}
             onGoMobility={() => setView({ type: "mobility" })}
             onGoEnergy={() => setView({ type: "energy" })}
           />
@@ -135,7 +135,7 @@ const Index = () => {
         return (
           <RoomListView
             onBack={goHome}
-            onSelectRoom={(id, date, time) => setView({ type: "roomDetail", roomId: id, date, time })}
+            onSelectRoom={(id, date, startTime, endTime) => setView({ type: "roomDetail", roomId: id, date, startTime, endTime })}
           />
         );
       case "roomDetail":
@@ -143,7 +143,7 @@ const Index = () => {
           <RoomDetailView
             roomId={view.roomId}
             onBack={() => setView({ type: "rooms" })}
-            onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId, date: view.date, time: view.time })}
+            onBook={() => setView({ type: "bookingConfirm", roomId: view.roomId, date: view.date, startTime: view.startTime, endTime: view.endTime })}
           />
         );
         case "bookingConfirm":
@@ -151,13 +151,14 @@ const Index = () => {
             <BookingConfirmView
               roomId={view.roomId}
               date={view.date}
-              time={view.time}
-              onBack={() => setView({ type: "roomDetail", roomId: view.roomId, date: view.date, time: view.time })}
-              onConfirm={() => handleBookingSuccess(view.roomId, view.date, view.time)}
+              startTime={view.startTime}
+              endTime={view.endTime}
+              onBack={() => setView({ type: "roomDetail", roomId: view.roomId, date: view.date, startTime: view.startTime, endTime: view.endTime })}
+              onConfirm={() => handleBookingSuccess(view.roomId, view.date, view.startTime, view.endTime)}
             />
           );
       case "bookingSuccess":
-        return <BookingSuccessView roomId={view.roomId} date={view.date} time={view.time} onBack={goHome} />;
+        return <BookingSuccessView roomId={view.roomId} date={view.date} startTime={view.startTime} endTime={view.endTime} onBack={goHome} />;
       case "mobility":
         return <ParkingMobilityView onBack={goHome} onViewBookings={goToBookingsList} />;
       case "energy":
