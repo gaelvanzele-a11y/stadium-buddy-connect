@@ -104,46 +104,6 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
     }, "carpool");
   };
 
-  const handleRentBike = (bikeId: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
-    confirmBooking({
-      title: t("bikeBookingTitle"),
-      itemName: `${t("bike")} ${bikeId}`,
-      location: t(locationKey),
-      date: todayLabel,
-      time: "Now",
-    });
-  };
-
-  const handleReserveCar = (carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
-    confirmBooking({
-      title: t("carBookingTitle"),
-      itemName: carName,
-      location: t(locationKey),
-      date: todayLabel,
-      time: "14:00 - 16:00",
-    });
-  };
-
-  const handleRequestRide = (ride: typeof carpoolRides[number]) => {
-    confirmBooking({
-      title: t("rideBookingTitle"),
-      itemName: `${t(ride.driverKey)} (${ride.seats} ${t("rideSeats")})`,
-      location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
-      date: t(ride.timeKey),
-      time: "",
-    });
-  };
-
-  const handleOfferRide = () => {
-    confirmBooking({
-      title: t("rideBookingTitle"),
-      itemName: t("offerRide"),
-      location: "UHasselt → Mijnstadion",
-      date: todayLabel,
-      time: "",
-    });
-  };
-
   const sections = [
     { id: "parking" as const, label: t("parkingSpaces").split(" ")[0], icon: Car },
     { id: "bikes" as const, label: t("eBike"), icon: Bike },
