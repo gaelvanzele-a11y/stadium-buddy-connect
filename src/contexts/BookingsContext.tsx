@@ -13,6 +13,7 @@ export interface Booking {
   // Room-specific
   roomId?: string;
   startTime?: string; // "HH:MM"
+  endTime?: string; // "HH:MM"
   // Mobility-specific (bike/car)
   itemId?: string;
   // Ticket-specific
@@ -30,8 +31,8 @@ interface BookingsContextValue {
   bookings: Booking[];
   cardBalance: number;
   addBooking: (b: Booking) => void;
-  isRoomSlotBooked: (roomId: string, dateISO: string, startTime: string) => boolean;
-  isMobilitySlotBooked: (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string) => boolean;
+  isRoomSlotBooked: (roomId: string, dateISO: string, startTime: string, endTime?: string) => boolean;
+  isMobilitySlotBooked: (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string, endTime?: string) => boolean;
   topUpCard: (amount: number) => Booking;
   reset: () => void;
 }
@@ -39,6 +40,43 @@ interface BookingsContextValue {
 const BookingsContext = createContext<BookingsContextValue | undefined>(undefined);
 
 const STARTING_BALANCE = 42.5;
+
+// Convert "HH:MM" to minutes from midnight
+const toMinutes = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
+
+// Deterministic hash for simulated occupancy of a single hourly slot
+const hourSlotOccupied = (key: string, threshold: number) => {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) {
+    h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return h % 100 < threshold;
+};
+
+// Iterate every hour [start, end) and check if any of them are occupied
+const anyHourOccupied = (
+  startTime: string,
+  endTime: string,
+  buildKey: (hh: string) => string,
+  threshold: number
+) => {
+  const startMin = toMinutes(startTime);
+  const endMin = toMinutes(endTime);
+  if (endMin <= startMin) return false;
+  for (let m = startMin; m < endMin; m += 60) {
+    const hh = `${String(Math.floor(m / 60)).padStart(2, "0")}:00`;
+    if (hourSlotOccupied(buildKey(hh), threshold)) return true;
+  }
+  return false;
+};
+
+// Two [start,end) ranges overlap?
+const rangesOverlap = (aStart: string, aEnd: string, bStart: string, bEnd: string) => {
+  return toMinutes(aStart) < toMinutes(bEnd) && toMinutes(bStart) < toMinutes(aEnd);
+};
 
 export const BookingsProvider = ({ children }: { children: ReactNode }) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -49,46 +87,35 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const isRoomSlotBooked = useCallback(
-    (roomId: string, dateISO: string, startTime: string) => {
-      // 1. Real bookings made by the user in this session
-      const realBooked = bookings.some(
-        (b) =>
-          b.kind === "room" &&
-          b.roomId === roomId &&
-          b.dateISO === dateISO &&
-          b.startTime === startTime
-      );
+    (roomId: string, dateISO: string, startTime: string, endTime?: string) => {
+      const reqEnd = endTime ?? `${String((toMinutes(startTime) + 60) / 60 | 0).padStart(2, "0")}:00`;
+
+      // 1. Real bookings overlapping the requested range
+      const realBooked = bookings.some((b) => {
+        if (b.kind !== "room" || b.roomId !== roomId || b.dateISO !== dateISO) return false;
+        if (!b.startTime || !b.endTime) return false;
+        return rangesOverlap(startTime, reqEnd, b.startTime, b.endTime);
+      });
       if (realBooked) return true;
 
-      // 2. Simulated pre-existing reservations: deterministic per (room, date, time)
-      // so the same room/date/time combination always shows the same status across
-      // the app, but distribution feels realistic (~35% occupied).
-      let h = 0;
-      const key = `${roomId}|${dateISO}|${startTime}`;
-      for (let i = 0; i < key.length; i++) {
-        h = (h * 31 + key.charCodeAt(i)) >>> 0;
-      }
-      return h % 100 < 35;
+      // 2. Simulated occupancy: check each hourly slot in [start, end)
+      return anyHourOccupied(startTime, reqEnd, (hh) => `${roomId}|${dateISO}|${hh}`, 35);
     },
     [bookings]
   );
 
   const isMobilitySlotBooked = useCallback(
-    (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string) => {
-      const realBooked = bookings.some(
-        (b) =>
-          b.kind === kind &&
-          b.itemId === itemId &&
-          b.dateISO === dateISO &&
-          b.startTime === startTime
-      );
+    (kind: "bike" | "car", itemId: string, dateISO: string, startTime: string, endTime?: string) => {
+      const reqEnd = endTime ?? `${String((toMinutes(startTime) + 60) / 60 | 0).padStart(2, "0")}:00`;
+
+      const realBooked = bookings.some((b) => {
+        if (b.kind !== kind || b.itemId !== itemId || b.dateISO !== dateISO) return false;
+        if (!b.startTime || !b.endTime) return false;
+        return rangesOverlap(startTime, reqEnd, b.startTime, b.endTime);
+      });
       if (realBooked) return true;
-      let h = 0;
-      const key = `${kind}|${itemId}|${dateISO}|${startTime}`;
-      for (let i = 0; i < key.length; i++) {
-        h = (h * 31 + key.charCodeAt(i)) >>> 0;
-      }
-      return h % 100 < 30;
+
+      return anyHourOccupied(startTime, reqEnd, (hh) => `${kind}|${itemId}|${dateISO}|${hh}`, 30);
     },
     [bookings]
   );
