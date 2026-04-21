@@ -1,22 +1,30 @@
 import { useState } from "react";
-import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck } from "lucide-react";
+import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck, CalendarIcon, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
 import { useBookings } from "@/contexts/BookingsContext";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 interface ParkingMobilityViewProps {
   onBack: () => void;
   onViewBookings?: () => void;
 }
 
+const timeOptions = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
+
 const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
-  const { addBooking } = useBookings();
+  const { addBooking, isMobilitySlotBooked } = useBookings();
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [time, setTime] = useState("14:00");
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
