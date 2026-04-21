@@ -60,14 +60,27 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
 
   const todayLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-  const confirmBooking = (info: MobilityBookingInfo, kind: "bike" | "car" | "carpool") => {
+  const dateISO = date ? format(date, "yyyy-MM-dd") : "";
+  const dateLabel = date ? format(date, "d MMM yyyy") : todayLabel;
+  const [hh, mm] = time.split(":").map(Number);
+  const endTime = `${String((hh + 2) % 24).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const slotLabel = `${time} - ${endTime}`;
+
+  const confirmBooking = (
+    info: MobilityBookingInfo,
+    kind: "bike" | "car" | "carpool",
+    extra?: { itemId?: string; dateISO?: string; startTime?: string }
+  ) => {
     setConfirmation(info);
     addBooking({
       id: Date.now().toString(),
       kind,
       roomName: `${info.title} — ${info.itemName}`,
       date: info.date,
+      dateISO: extra?.dateISO,
       time: info.time,
+      startTime: extra?.startTime,
+      itemId: extra?.itemId,
       location: info.location,
     });
   };
@@ -77,19 +90,19 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
       title: t("bikeBookingTitle"),
       itemName: `${t("bike")} ${bikeId}`,
       location: t(locationKey),
-      date: todayLabel,
-      time: "Now",
-    }, "bike");
+      date: dateLabel,
+      time: slotLabel,
+    }, "bike", { itemId: bikeId, dateISO, startTime: time });
   };
 
-  const handleReserveCar = (carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
+  const handleReserveCar = (carId: string, carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
     confirmBooking({
       title: t("carBookingTitle"),
       itemName: carName,
       location: t(locationKey),
-      date: todayLabel,
-      time: "14:00 - 16:00",
-    }, "car");
+      date: dateLabel,
+      time: slotLabel,
+    }, "car", { itemId: carId, dateISO, startTime: time });
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
