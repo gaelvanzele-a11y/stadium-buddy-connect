@@ -72,15 +72,6 @@ const BookingSuccessView = ({ roomId, date, time, onBack }: BookingSuccessViewPr
           <Navigation className="h-4 w-4" />
           {t("routeDescription")}
         </button>
-        {!carAlreadyBooked && (
-          <button
-            onClick={handleReserveCar}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground"
-          >
-            <Car className="h-4 w-4" />
-            {t("reserveSharedCar")}
-          </button>
-        )}
       </div>
 
       <button onClick={onBack} className="mt-4 text-sm text-primary font-medium">
