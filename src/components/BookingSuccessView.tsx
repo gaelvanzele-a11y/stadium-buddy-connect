@@ -26,7 +26,7 @@ const BookingSuccessView = ({ roomId, date, startTime, endTime, onBack }: Bookin
 
   const handleDirections = () => {
     window.open(
-      "https://www.google.com/maps/dir/UHasselt,+Martelarenlaan+42,+3500+Hasselt/Mijnstadion,+Beringen",
+      "https://www.google.com/maps/dir/UHasselt+Building+D,+Agoralaan,+3590+Diepenbeek/Mijnstadion,+Beringen",
       "_blank"
     );
   };
