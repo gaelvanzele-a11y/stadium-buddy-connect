@@ -209,6 +209,20 @@ const translations = {
     // Login gate
     loginWelcome: "Welcome to Mijnstadion",
     loginSubtitle: "Sign in to continue",
+    landingTagline: "Your stadium hub for workspaces, mobility and energy.",
+    signIn: "Sign In",
+    signUp: "Sign Up",
+    register: "Register",
+    createAccount: "Create your account",
+    alreadyHaveAccount: "Already have an account?",
+    noAccountYet: "Don't have an account?",
+    fullName: "Full name",
+    fullNamePlaceholder: "Your name",
+    confirmPassword: "Confirm password",
+    passwordsDontMatch: "Passwords do not match.",
+    accountCreated: "Account created — please sign in.",
+    userAlreadyExists: "An account with this username already exists.",
+    backToWelcome: "Back",
     // Room availability
     availableUnits: "available",
     // Ticketshop
