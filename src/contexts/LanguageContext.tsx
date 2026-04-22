@@ -511,6 +511,20 @@ const translations = {
     // Login gate
     loginWelcome: "Welkom bij het Mijnstadion",
     loginSubtitle: "Log in om verder te gaan",
+    landingTagline: "Jouw stadionhub voor werkplekken, mobiliteit en energie.",
+    signIn: "Inloggen",
+    signUp: "Registreren",
+    register: "Registreren",
+    createAccount: "Maak je account aan",
+    alreadyHaveAccount: "Heb je al een account?",
+    noAccountYet: "Nog geen account?",
+    fullName: "Volledige naam",
+    fullNamePlaceholder: "Je naam",
+    confirmPassword: "Bevestig wachtwoord",
+    passwordsDontMatch: "Wachtwoorden komen niet overeen.",
+    accountCreated: "Account aangemaakt — log in om verder te gaan.",
+    userAlreadyExists: "Er bestaat al een account met deze gebruikersnaam.",
+    backToWelcome: "Terug",
     // Room availability
     availableUnits: "beschikbaar",
     // Ticketshop
