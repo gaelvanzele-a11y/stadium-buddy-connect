@@ -174,7 +174,7 @@ const translations = {
     inviteMessagePlaceholder: "Join us at the stadium platform!",
     // Directions
     directionsTitle: "Directions",
-    directionsFrom: "UHasselt",
+    directionsFrom: "UHasselt Building D, Diepenbeek",
     directionsTo: "Mijnstadion Beringen",
     openInMaps: "Open in Google Maps",
     // Carpool rides
@@ -462,7 +462,7 @@ const translations = {
     inviteMessagePlaceholder: "Doe mee op het stadionplatform!",
     // Directions
     directionsTitle: "Routebeschrijving",
-    directionsFrom: "UHasselt",
+    directionsFrom: "UHasselt Gebouw D, Diepenbeek",
     directionsTo: "Mijnstadion Beringen",
     openInMaps: "Open in Google Maps",
     // Carpool rides
