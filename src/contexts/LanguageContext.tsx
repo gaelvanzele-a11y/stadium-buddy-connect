@@ -174,7 +174,7 @@ const translations = {
     inviteMessagePlaceholder: "Join us at the stadium platform!",
     // Directions
     directionsTitle: "Directions",
-    directionsFrom: "UHasselt",
+    directionsFrom: "UHasselt Building D, Diepenbeek",
     directionsTo: "Mijnstadion Beringen",
     openInMaps: "Open in Google Maps",
     // Carpool rides
@@ -209,6 +209,20 @@ const translations = {
     // Login gate
     loginWelcome: "Welcome to Mijnstadion",
     loginSubtitle: "Sign in to continue",
+    landingTagline: "Your stadium hub for workspaces, mobility and energy.",
+    signIn: "Sign In",
+    signUp: "Sign Up",
+    register: "Register",
+    createAccount: "Create your account",
+    alreadyHaveAccount: "Already have an account?",
+    noAccountYet: "Don't have an account?",
+    fullName: "Full name",
+    fullNamePlaceholder: "Your name",
+    confirmPassword: "Confirm password",
+    passwordsDontMatch: "Passwords do not match.",
+    accountCreated: "Account created — please sign in.",
+    userAlreadyExists: "An account with this username already exists.",
+    backToWelcome: "Back",
     // Room availability
     availableUnits: "available",
     // Ticketshop
@@ -462,7 +476,7 @@ const translations = {
     inviteMessagePlaceholder: "Doe mee op het stadionplatform!",
     // Directions
     directionsTitle: "Routebeschrijving",
-    directionsFrom: "UHasselt",
+    directionsFrom: "UHasselt Gebouw D, Diepenbeek",
     directionsTo: "Mijnstadion Beringen",
     openInMaps: "Open in Google Maps",
     // Carpool rides
@@ -497,6 +511,20 @@ const translations = {
     // Login gate
     loginWelcome: "Welkom bij het Mijnstadion",
     loginSubtitle: "Log in om verder te gaan",
+    landingTagline: "Jouw stadionhub voor werkplekken, mobiliteit en energie.",
+    signIn: "Inloggen",
+    signUp: "Registreren",
+    register: "Registreren",
+    createAccount: "Maak je account aan",
+    alreadyHaveAccount: "Heb je al een account?",
+    noAccountYet: "Nog geen account?",
+    fullName: "Volledige naam",
+    fullNamePlaceholder: "Je naam",
+    confirmPassword: "Bevestig wachtwoord",
+    passwordsDontMatch: "Wachtwoorden komen niet overeen.",
+    accountCreated: "Account aangemaakt — log in om verder te gaan.",
+    userAlreadyExists: "Er bestaat al een account met deze gebruikersnaam.",
+    backToWelcome: "Terug",
     // Room availability
     availableUnits: "beschikbaar",
     // Ticketshop

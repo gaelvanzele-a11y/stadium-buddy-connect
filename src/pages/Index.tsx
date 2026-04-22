@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Zap, Briefcase, Bike, Leaf, Ticket } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -38,13 +38,35 @@ export type AppView =
   | { type: "governance" }
   | { type: "ticketshop" };
 
+const AUTH_STORAGE_KEY = "mijnstadion.authedUser";
+
 const Index = () => {
   const { t, lang } = useLanguage();
   const { addBooking, reset } = useBookings();
-  const [authedUser, setAuthedUser] = useState<{ name: string; isManager: boolean } | null>(null);
+  const [authedUser, setAuthedUser] = useState<{ name: string; isManager: boolean } | null>(() => {
+    try {
+      const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.name === "string" && typeof parsed.isManager === "boolean") {
+        return parsed;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
   const [view, setView] = useState<AppView>({ type: "home" });
   const [bottomTab, setBottomTab] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (authedUser) {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authedUser));
+    } else {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+  }, [authedUser]);
 
   const goHome = () => {
     setView({ type: "home" });
