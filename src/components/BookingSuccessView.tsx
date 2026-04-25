@@ -66,9 +66,6 @@ const BookingSuccessView = ({ roomId, date, startTime, endTime, onBack }: Bookin
       </div>
 
       <div className="mt-5 w-full space-y-3">
-        <button className="w-full rounded-xl bg-accent py-3 font-display text-sm font-bold text-accent-foreground">
-          {t("openSmartLock")}
-        </button>
         <button
           onClick={handleDirections}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 font-display text-sm font-bold text-foreground"
