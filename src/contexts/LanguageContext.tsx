@@ -34,6 +34,7 @@ const translations = {
     reserveSharedCar: "RESERVE SHARED CAR",
     hours: "hours",
     perHour: "/hr",
+    perRide: "per ride",
     persons: "p",
     wifi: "Wi-Fi",
     projector: "Projector",
