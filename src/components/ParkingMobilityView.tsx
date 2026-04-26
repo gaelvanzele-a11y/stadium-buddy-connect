@@ -32,6 +32,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState("14:00");
   const [endTime, setEndTime] = useState("16:00");
+  const [highlightedZone, setHighlightedZone] = useState<ZoneKey | null>(null);
 
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
