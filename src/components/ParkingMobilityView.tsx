@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
+import MobilityConfirmDialog, { type MobilityPendingBooking } from "@/components/MobilityConfirmDialog";
 import { useBookings } from "@/contexts/BookingsContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -29,6 +30,13 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
+  const [pending, setPending] = useState<
+    | (MobilityPendingBooking & {
+        kind: "bike" | "car" | "carpool";
+        extra?: { itemId?: string; dateISO?: string; startTime?: string; endTime?: string };
+      })
+    | null
+  >(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState("14:00");
   const [endTime, setEndTime] = useState("16:00");
@@ -93,34 +101,54 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
     });
   };
 
+  const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
+
   const handleRentBike = (bikeId: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
-    confirmBooking({
+    setPending({
+      kind: "bike",
       title: t("bikeBookingTitle"),
       itemName: `${t("bike")} ${bikeId}`,
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "bike", { itemId: bikeId, dateISO, startTime, endTime });
+      totalCost: 2 * hours,
+      costBreakdown: `${hours} ${t("hours")} × €2${t("perHour")}`,
+      extra: { itemId: bikeId, dateISO, startTime, endTime },
+    });
   };
 
   const handleReserveCar = (carId: string, carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
-    confirmBooking({
+    setPending({
+      kind: "car",
       title: t("carBookingTitle"),
       itemName: carName,
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "car", { itemId: carId, dateISO, startTime, endTime });
+      totalCost: 8 * hours,
+      costBreakdown: `${hours} ${t("hours")} × €8${t("perHour")}`,
+      extra: { itemId: carId, dateISO, startTime, endTime },
+    });
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
-    confirmBooking({
+    setPending({
+      kind: "carpool",
       title: t("rideBookingTitle"),
       itemName: `${t(ride.driverKey)} (${ride.seats} ${t("rideSeats")})`,
       location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
       date: t(ride.timeKey),
       time: "",
-    }, "carpool");
+      totalCost: 3,
+      costBreakdown: `1 ${t("perRide")} × €3`,
+    });
+  };
+
+  const handleConfirmPending = () => {
+    if (!pending) return;
+    const { kind, extra, totalCost, costBreakdown, ...info } = pending;
+    confirmBooking(info, kind, extra);
+    setPending(null);
   };
 
   const [offerFrom, setOfferFrom] = useState("UHasselt");
@@ -546,6 +574,12 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
           )}
         </motion.div>
       )}
+
+      <MobilityConfirmDialog
+        pending={pending}
+        onCancel={() => setPending(null)}
+        onConfirm={handleConfirmPending}
+      />
 
       <MobilityBookingDialog
         booking={confirmation}
