@@ -294,6 +294,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                       <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
                       <span className="text-muted-foreground">{bike.battery}%</span>
                     </div>
+                    <span className="text-[11px] font-semibold text-mobility-blue">€2{t("perHour")}</span>
                     {!slotTaken ? (
                       <button
                         onClick={() => handleRentBike(bike.id, bike.locationKey)}
@@ -373,18 +374,21 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                       </p>
                     </div>
                   </div>
-                  {!slotTaken ? (
-                    <button
-                      onClick={() => handleReserveCar(car.id, car.name, car.locationKey)}
-                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      {t("reserveCar")}
-                    </button>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[11px] font-semibold text-mobility-blue">€8{t("perHour")}</span>
+                    {!slotTaken ? (
+                      <button
+                        onClick={() => handleReserveCar(car.id, car.name, car.locationKey)}
+                        className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        {t("reserveCar")}
+                      </button>
                   ) : (
                     <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
                       {t("reservedSlot")}
                     </span>
                   )}
+                  </div>
                 </motion.div>
               );
             })}
@@ -435,6 +439,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">{ride.seats} {t("rideSeats")}</p>
+                      <p className="text-[11px] font-semibold text-mobility-blue">€3 {t("perRide") }</p>
                       <button
                         onClick={() => handleRequestRide(ride)}
                         className="mt-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
