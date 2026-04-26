@@ -222,6 +222,58 @@ const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapPro
             strokeWidth="0.5"
           />
         ))}
+
+        {/* Stand labels (over the outer ring) */}
+        {[
+          { x: 120, y: 36, label: t("standNorth") },
+          { x: 120, y: 117, label: t("standSouth") },
+          { x: 80, y: 75, label: t("standMain"), rotate: -90 },
+          { x: 160, y: 75, label: t("standFamily"), rotate: 90 },
+        ].map((s, i) => (
+          <text
+            key={`stand-label-${i}`}
+            x={s.x}
+            y={s.y}
+            textAnchor="middle"
+            className="fill-muted-foreground"
+            style={{ fontSize: 4.5, fontWeight: 700, letterSpacing: 0.3 }}
+            transform={s.rotate ? `rotate(${s.rotate} ${s.x} ${s.y})` : undefined}
+          >
+            {s.label.toUpperCase()}
+          </text>
+        ))}
+
+        {/* Facility pins (static, non-interactive) */}
+        {[
+          { x: 30, y: 30, label: t("facilityParking"), color: "hsl(var(--mobility-blue))" },
+          { x: 210, y: 30, label: t("facilityBikeRack"), color: "hsl(var(--energy-leaf))" },
+          { x: 30, y: 120, label: t("facilityVipEntrance"), color: "hsl(var(--accent))" },
+          { x: 210, y: 120, label: t("facilityFirstAid"), color: "hsl(var(--destructive))" },
+        ].map((f, i) => {
+          const isLeft = f.x < 120;
+          return (
+            <g key={`facility-${i}`}>
+              <circle
+                cx={f.x}
+                cy={f.y}
+                r={2.8}
+                fill={f.color}
+                stroke="hsl(var(--card))"
+                strokeWidth="1"
+              />
+              <text
+                x={isLeft ? f.x + 4 : f.x - 4}
+                y={f.y + 1.6}
+                textAnchor={isLeft ? "start" : "end"}
+                className="fill-foreground"
+                style={{ fontSize: 5, fontWeight: 600 }}
+              >
+                {f.label}
+              </text>
+            </g>
+          );
+        })}
+
         {zoneKeys.map((key) => {
           const z = ZONES[key];
           const isActive = highlighted === key;
