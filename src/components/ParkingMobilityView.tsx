@@ -294,6 +294,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                       <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
                       <span className="text-muted-foreground">{bike.battery}%</span>
                     </div>
+                    <span className="text-[11px] font-semibold text-mobility-blue">€2{t("perHour")}</span>
                     {!slotTaken ? (
                       <button
                         onClick={() => handleRentBike(bike.id, bike.locationKey)}
