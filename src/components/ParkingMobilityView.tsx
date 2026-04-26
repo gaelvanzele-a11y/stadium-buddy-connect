@@ -575,6 +575,12 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
         </motion.div>
       )}
 
+      <MobilityConfirmDialog
+        pending={pending}
+        onCancel={() => setPending(null)}
+        onConfirm={handleConfirmPending}
+      />
+
       <MobilityBookingDialog
         booking={confirmation}
         onClose={() => setConfirmation(null)}
