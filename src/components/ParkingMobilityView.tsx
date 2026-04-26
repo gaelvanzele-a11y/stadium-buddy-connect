@@ -369,7 +369,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                         isZoneActive ? "text-mobility-blue font-semibold" : "text-muted-foreground"
                       )}>
                         <MapPin className="h-3 w-3" />
-                        {t(car.locationKey)} · {t(car.type)}
+                        {t(car.locationKey)} · {t(car.type as "electric" | "hybrid")}
                       </p>
                     </div>
                   </div>
