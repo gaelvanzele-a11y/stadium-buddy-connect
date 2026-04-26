@@ -17,10 +17,10 @@ const ZONES: Record<
   ZoneKey,
   { x: number; y: number; labelX: number; labelY: number; anchor: "start" | "middle" | "end" }
 > = {
-  northGate: { x: 100, y: 22, labelX: 100, labelY: 14, anchor: "middle" },
-  eastWing: { x: 168, y: 70, labelX: 178, labelY: 73, anchor: "start" },
-  southGate: { x: 100, y: 118, labelX: 100, labelY: 134, anchor: "middle" },
-  westVIP: { x: 32, y: 70, labelX: 22, labelY: 73, anchor: "end" },
+  northGate: { x: 120, y: 27, labelX: 120, labelY: 17, anchor: "middle" },
+  eastWing: { x: 188, y: 75, labelX: 196, labelY: 78, anchor: "start" },
+  southGate: { x: 120, y: 123, labelX: 120, labelY: 140, anchor: "middle" },
+  westVIP: { x: 52, y: 75, labelX: 44, labelY: 78, anchor: "end" },
 };
 
 const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapProps) => {
