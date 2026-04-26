@@ -582,7 +582,9 @@ const translations = {
     chatbotResponseEnergy: "De zonnepanelen van het stadion produceren tot 200 kW. Overtollige energie wordt gedeeld met 5 lokale buren in de buurt.",
     chatbotResponseBike: "We hebben 6 e-bikes beschikbaar op verschillende locaties. Bekijk het tabblad E-Fiets in Deelmobiliteit om er een te huren.",
     chatbotResponsePrice: "Ruimteprijzen variëren van €10/u (Werkplek) tot €25/u (Persruimte). VIP-loges starten vanaf €15/u.",
-    chatbotFallback: "Ik kan vragen beantwoorden over parkeren, ruimtes, energie, fietsen en prijzen. Stel gerust een vraag!",
+    chatbotResponseCarpool: "Carpool-ritten vind je onder Deelmobiliteit. Klik op de knop hieronder om er direct naartoe te gaan.",
+    chatbotGoToCarpool: "Ga naar Carpool",
+    chatbotFallback: "Ik kan vragen beantwoorden over parkeren, ruimtes, energie, fietsen, carpool en prijzen. Stel gerust een vraag!",
     // Ticketshop additions
     ticketshopMenu: "Ticketshop",
     upcomingBookings: "Aankomende boekingen",
