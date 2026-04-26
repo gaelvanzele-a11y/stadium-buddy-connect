@@ -235,7 +235,7 @@ const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapPro
             textAnchor="middle"
             className="fill-muted-foreground"
             style={{ fontSize: 4.5, fontWeight: 700, letterSpacing: 0.3 }}
-            transform={s.rotate ? `rotate(${s.rotate} ${s.x} ${s.y})` : undefined}
+            
           >
             {s.label.toUpperCase()}
           </text>
