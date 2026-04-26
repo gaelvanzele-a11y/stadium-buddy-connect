@@ -101,34 +101,54 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
     });
   };
 
+  const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
+
   const handleRentBike = (bikeId: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
-    confirmBooking({
+    setPending({
+      kind: "bike",
       title: t("bikeBookingTitle"),
       itemName: `${t("bike")} ${bikeId}`,
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "bike", { itemId: bikeId, dateISO, startTime, endTime });
+      totalCost: 2 * hours,
+      costBreakdown: `${hours} ${t("hours")} × €2${t("perHour")}`,
+      extra: { itemId: bikeId, dateISO, startTime, endTime },
+    });
   };
 
   const handleReserveCar = (carId: string, carName: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
-    confirmBooking({
+    setPending({
+      kind: "car",
       title: t("carBookingTitle"),
       itemName: carName,
       location: t(locationKey),
       date: dateLabel,
       time: slotLabel,
-    }, "car", { itemId: carId, dateISO, startTime, endTime });
+      totalCost: 8 * hours,
+      costBreakdown: `${hours} ${t("hours")} × €8${t("perHour")}`,
+      extra: { itemId: carId, dateISO, startTime, endTime },
+    });
   };
 
   const handleRequestRide = (ride: typeof carpoolRides[number]) => {
-    confirmBooking({
+    setPending({
+      kind: "carpool",
       title: t("rideBookingTitle"),
       itemName: `${t(ride.driverKey)} (${ride.seats} ${t("rideSeats")})`,
       location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
       date: t(ride.timeKey),
       time: "",
-    }, "carpool");
+      totalCost: 3,
+      costBreakdown: `1 ${t("perRide")} × €3`,
+    });
+  };
+
+  const handleConfirmPending = () => {
+    if (!pending) return;
+    const { kind, extra, totalCost, costBreakdown, ...info } = pending;
+    confirmBooking(info, kind, extra);
+    setPending(null);
   };
 
   const [offerFrom, setOfferFrom] = useState("UHasselt");
