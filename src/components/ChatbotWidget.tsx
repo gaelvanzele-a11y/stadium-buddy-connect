@@ -1,15 +1,22 @@
 import { useState } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+type ChatAction = { label: string; target: "carpool" };
 
 interface Message {
   id: string;
   text: string;
   isBot: boolean;
+  action?: ChatAction;
 }
 
-const ChatbotWidget = () => {
+interface ChatbotWidgetProps {
+  onNavigateCarpool?: () => void;
+}
+
+const ChatbotWidget = ({ onNavigateCarpool }: ChatbotWidgetProps) => {
   const { t, lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -23,10 +30,13 @@ const ChatbotWidget = () => {
     setMessages([{ id: "welcome", text: t("chatbotWelcome"), isBot: true }]);
   }
 
-  const getBotResponse = (userMsg: string): string => {
+  const getBotResponse = (userMsg: string): { text: string; action?: ChatAction } => {
     const lower = userMsg.toLowerCase();
 
     // Bilingual keyword matching
+    const carpoolKeys = lang === "nl"
+      ? ["carpool", "samenrijden", "rit"]
+      : ["carpool", "rideshare", "ride"];
     const parkingKeys = lang === "nl"
       ? ["parkeer", "parking", "auto", "wagen"]
       : ["parking", "park", "car"];
@@ -43,24 +53,44 @@ const ChatbotWidget = () => {
       ? ["prijs", "kost", "tarief"]
       : ["price", "cost", "rate"];
 
-    if (parkingKeys.some((k) => lower.includes(k))) return t("chatbotResponseParking");
-    if (roomKeys.some((k) => lower.includes(k))) return t("chatbotResponseRoom");
-    if (energyKeys.some((k) => lower.includes(k))) return t("chatbotResponseEnergy");
-    if (bikeKeys.some((k) => lower.includes(k))) return t("chatbotResponseBike");
-    if (priceKeys.some((k) => lower.includes(k))) return t("chatbotResponsePrice");
+    // Check carpool first so it doesn't get caught by parking ("auto") or bike ("rit"-like)
+    if (carpoolKeys.some((k) => lower.includes(k))) {
+      return {
+        text: t("chatbotResponseCarpool"),
+        action: { label: t("chatbotGoToCarpool"), target: "carpool" },
+      };
+    }
+    if (parkingKeys.some((k) => lower.includes(k))) return { text: t("chatbotResponseParking") };
+    if (roomKeys.some((k) => lower.includes(k))) return { text: t("chatbotResponseRoom") };
+    if (energyKeys.some((k) => lower.includes(k))) return { text: t("chatbotResponseEnergy") };
+    if (bikeKeys.some((k) => lower.includes(k))) return { text: t("chatbotResponseBike") };
+    if (priceKeys.some((k) => lower.includes(k))) return { text: t("chatbotResponsePrice") };
 
-    return t("chatbotFallback");
+    return { text: t("chatbotFallback") };
   };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
+    const response = getBotResponse(input);
     const userMsg: Message = { id: `u-${Date.now()}`, text: input, isBot: false };
-    const botMsg: Message = { id: `b-${Date.now()}`, text: getBotResponse(input), isBot: true };
+    const botMsg: Message = {
+      id: `b-${Date.now()}`,
+      text: response.text,
+      isBot: true,
+      action: response.action,
+    };
 
     setMessages((prev) => [...prev, userMsg, botMsg]);
     setInput("");
+  };
+
+  const handleAction = (action: ChatAction) => {
+    if (action.target === "carpool") {
+      onNavigateCarpool?.();
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -106,13 +136,28 @@ const ChatbotWidget = () => {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
-                    msg.isBot
-                      ? "self-start bg-secondary text-foreground"
-                      : "self-end bg-primary text-primary-foreground"
+                  className={`flex max-w-[85%] flex-col gap-2 ${
+                    msg.isBot ? "self-start items-start" : "self-end items-end"
                   }`}
                 >
-                  {msg.text}
+                  <div
+                    className={`rounded-xl px-3 py-2 text-sm ${
+                      msg.isBot
+                        ? "bg-secondary text-foreground"
+                        : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                  {msg.isBot && msg.action && (
+                    <button
+                      onClick={() => handleAction(msg.action!)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-mobility-blue px-3 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
+                    >
+                      {msg.action.label}
+                      <ArrowRight className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
