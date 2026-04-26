@@ -374,18 +374,21 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                       </p>
                     </div>
                   </div>
-                  {!slotTaken ? (
-                    <button
-                      onClick={() => handleReserveCar(car.id, car.name, car.locationKey)}
-                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      {t("reserveCar")}
-                    </button>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[11px] font-semibold text-mobility-blue">€8{t("perHour")}</span>
+                    {!slotTaken ? (
+                      <button
+                        onClick={() => handleReserveCar(car.id, car.name, car.locationKey)}
+                        className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        {t("reserveCar")}
+                      </button>
                   ) : (
                     <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-semibold text-destructive">
                       {t("reservedSlot")}
                     </span>
                   )}
+                  </div>
                 </motion.div>
               );
             })}
