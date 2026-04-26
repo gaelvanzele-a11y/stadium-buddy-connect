@@ -55,27 +55,27 @@ const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapPro
         />
         {/* Inner field */}
         <ellipse
-          cx="100"
-          cy="70"
-          rx="58"
-          ry="34"
+          cx="120"
+          cy="75"
+          rx="52"
+          ry="32"
           className="fill-energy-leaf/20"
           stroke="hsl(var(--primary) / 0.4)"
           strokeWidth="0.8"
           strokeDasharray="2 2"
         />
         <line
-          x1="100"
-          y1="36"
-          x2="100"
-          y2="104"
+          x1="120"
+          y1="43"
+          x2="120"
+          y2="107"
           stroke="hsl(var(--primary) / 0.4)"
           strokeWidth="0.6"
           strokeDasharray="2 2"
         />
         <circle
-          cx="100"
-          cy="70"
+          cx="120"
+          cy="75"
           r="8"
           fill="none"
           stroke="hsl(var(--primary) / 0.4)"
