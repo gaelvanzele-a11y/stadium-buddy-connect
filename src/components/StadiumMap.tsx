@@ -227,8 +227,6 @@ const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapPro
         {[
           { x: 120, y: 36, label: t("standNorth") },
           { x: 120, y: 117, label: t("standSouth") },
-          { x: 80, y: 75, label: t("standMain"), rotate: -90 },
-          { x: 160, y: 75, label: t("standFamily"), rotate: 90 },
         ].map((s, i) => (
           <text
             key={`stand-label-${i}`}
