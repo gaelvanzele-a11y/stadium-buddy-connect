@@ -268,7 +268,9 @@ const translations = {
     chatbotResponseEnergy: "The stadium's solar panels generate up to 200 kW. Surplus energy is shared with 5 local neighbours in the community.",
     chatbotResponseBike: "We have 6 e-bikes available at various locations. Check the E-Bike tab in Shared Mobility to rent one.",
     chatbotResponsePrice: "Room prices range from €10/hr (Workspace) to €25/hr (Press Room). VIP Loges start at €15/hr.",
-    chatbotFallback: "I can help with questions about parking, rooms, energy, bikes, and prices. Feel free to ask!",
+    chatbotResponseCarpool: "You can find Carpool rides under Shared Mobility. Tap the button below to jump straight there.",
+    chatbotGoToCarpool: "Open Carpool",
+    chatbotFallback: "I can help with questions about parking, rooms, energy, bikes, carpool, and prices. Feel free to ask!",
     // Ticketshop additions
     ticketshopMenu: "Ticketshop",
     upcomingBookings: "Upcoming bookings",
@@ -580,7 +582,9 @@ const translations = {
     chatbotResponseEnergy: "De zonnepanelen van het stadion produceren tot 200 kW. Overtollige energie wordt gedeeld met 5 lokale buren in de buurt.",
     chatbotResponseBike: "We hebben 6 e-bikes beschikbaar op verschillende locaties. Bekijk het tabblad E-Fiets in Deelmobiliteit om er een te huren.",
     chatbotResponsePrice: "Ruimteprijzen variëren van €10/u (Werkplek) tot €25/u (Persruimte). VIP-loges starten vanaf €15/u.",
-    chatbotFallback: "Ik kan vragen beantwoorden over parkeren, ruimtes, energie, fietsen en prijzen. Stel gerust een vraag!",
+    chatbotResponseCarpool: "Carpool-ritten vind je onder Deelmobiliteit. Klik op de knop hieronder om er direct naartoe te gaan.",
+    chatbotGoToCarpool: "Ga naar Carpool",
+    chatbotFallback: "Ik kan vragen beantwoorden over parkeren, ruimtes, energie, fietsen, carpool en prijzen. Stel gerust een vraag!",
     // Ticketshop additions
     ticketshopMenu: "Ticketshop",
     upcomingBookings: "Aankomende boekingen",
