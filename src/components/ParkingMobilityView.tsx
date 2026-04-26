@@ -30,6 +30,13 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
+  const [pending, setPending] = useState<
+    | (MobilityPendingBooking & {
+        kind: "bike" | "car" | "carpool";
+        extra?: { itemId?: string; dateISO?: string; startTime?: string; endTime?: string };
+      })
+    | null
+  >(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState("14:00");
   const [endTime, setEndTime] = useState("16:00");
