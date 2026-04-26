@@ -15,6 +15,7 @@ import StadiumMap, { type ZoneKey } from "@/components/StadiumMap";
 interface ParkingMobilityViewProps {
   onBack: () => void;
   onViewBookings?: () => void;
+  initialSection?: "parking" | "bikes" | "shared" | "carpool";
 }
 
 const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
@@ -24,10 +25,10 @@ const toMin = (hhmm: string) => {
   return h * 60 + (m || 0);
 };
 
-const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProps) => {
+const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: ParkingMobilityViewProps) => {
   const { t } = useLanguage();
   const { addBooking, isMobilitySlotBooked } = useBookings();
-  const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">("parking");
+  const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">(initialSection ?? "parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
   const [confirmation, setConfirmation] = useState<MobilityBookingInfo | null>(null);
   const [pending, setPending] = useState<
