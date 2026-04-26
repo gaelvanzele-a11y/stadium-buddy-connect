@@ -268,7 +268,9 @@ const translations = {
     chatbotResponseEnergy: "The stadium's solar panels generate up to 200 kW. Surplus energy is shared with 5 local neighbours in the community.",
     chatbotResponseBike: "We have 6 e-bikes available at various locations. Check the E-Bike tab in Shared Mobility to rent one.",
     chatbotResponsePrice: "Room prices range from €10/hr (Workspace) to €25/hr (Press Room). VIP Loges start at €15/hr.",
-    chatbotFallback: "I can help with questions about parking, rooms, energy, bikes, and prices. Feel free to ask!",
+    chatbotResponseCarpool: "You can find Carpool rides under Shared Mobility. Tap the button below to jump straight there.",
+    chatbotGoToCarpool: "Open Carpool",
+    chatbotFallback: "I can help with questions about parking, rooms, energy, bikes, carpool, and prices. Feel free to ask!",
     // Ticketshop additions
     ticketshopMenu: "Ticketshop",
     upcomingBookings: "Upcoming bookings",
