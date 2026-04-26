@@ -37,17 +37,18 @@ const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapPro
       </div>
 
       <svg
-        viewBox="0 0 200 140"
+        viewBox="0 0 240 150"
         className="h-auto w-full"
         role="img"
         aria-label={t("stadiumMap")}
+        overflow="visible"
       >
         {/* Outer stadium ring */}
         <ellipse
-          cx="100"
-          cy="70"
-          rx="86"
-          ry="56"
+          cx="120"
+          cy="75"
+          rx="78"
+          ry="52"
           className="fill-secondary"
           stroke="hsl(var(--border))"
           strokeWidth="1"
