@@ -17,10 +17,10 @@ const ZONES: Record<
   ZoneKey,
   { x: number; y: number; labelX: number; labelY: number; anchor: "start" | "middle" | "end" }
 > = {
-  northGate: { x: 100, y: 22, labelX: 100, labelY: 14, anchor: "middle" },
-  eastWing: { x: 168, y: 70, labelX: 178, labelY: 73, anchor: "start" },
-  southGate: { x: 100, y: 118, labelX: 100, labelY: 134, anchor: "middle" },
-  westVIP: { x: 32, y: 70, labelX: 22, labelY: 73, anchor: "end" },
+  northGate: { x: 120, y: 27, labelX: 120, labelY: 17, anchor: "middle" },
+  eastWing: { x: 188, y: 75, labelX: 196, labelY: 78, anchor: "start" },
+  southGate: { x: 120, y: 123, labelX: 120, labelY: 140, anchor: "middle" },
+  westVIP: { x: 52, y: 75, labelX: 44, labelY: 78, anchor: "end" },
 };
 
 const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapProps) => {
@@ -37,44 +37,45 @@ const StadiumMap = ({ highlighted, onSelect, counts, countLabel }: StadiumMapPro
       </div>
 
       <svg
-        viewBox="0 0 200 140"
+        viewBox="0 0 240 150"
         className="h-auto w-full"
         role="img"
         aria-label={t("stadiumMap")}
+        overflow="visible"
       >
         {/* Outer stadium ring */}
         <ellipse
-          cx="100"
-          cy="70"
-          rx="86"
-          ry="56"
+          cx="120"
+          cy="75"
+          rx="78"
+          ry="52"
           className="fill-secondary"
           stroke="hsl(var(--border))"
           strokeWidth="1"
         />
         {/* Inner field */}
         <ellipse
-          cx="100"
-          cy="70"
-          rx="58"
-          ry="34"
+          cx="120"
+          cy="75"
+          rx="52"
+          ry="32"
           className="fill-energy-leaf/20"
           stroke="hsl(var(--primary) / 0.4)"
           strokeWidth="0.8"
           strokeDasharray="2 2"
         />
         <line
-          x1="100"
-          y1="36"
-          x2="100"
-          y2="104"
+          x1="120"
+          y1="43"
+          x2="120"
+          y2="107"
           stroke="hsl(var(--primary) / 0.4)"
           strokeWidth="0.6"
           strokeDasharray="2 2"
         />
         <circle
-          cx="100"
-          cy="70"
+          cx="120"
+          cy="75"
           r="8"
           fill="none"
           stroke="hsl(var(--primary) / 0.4)"
