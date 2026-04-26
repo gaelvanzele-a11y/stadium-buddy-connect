@@ -32,7 +32,7 @@ export type AppView =
   | { type: "roomDetail"; roomId: string; date: Date; startTime: string; endTime: string }
   | { type: "bookingConfirm"; roomId: string; date: Date; startTime: string; endTime: string }
   | { type: "bookingSuccess"; roomId: string; date: Date; startTime: string; endTime: string }
-  | { type: "mobility" }
+  | { type: "mobility"; initialSection?: "parking" | "bikes" | "shared" | "carpool" }
   | { type: "energy" }
   | { type: "feedback" }
   | { type: "governance" }
@@ -78,8 +78,8 @@ const Index = () => {
     setBottomTab("bookings");
   };
 
-  const goToMobility = () => {
-    setView({ type: "mobility" });
+  const goToMobility = (initialSection?: "parking" | "bikes" | "shared" | "carpool") => {
+    setView({ type: "mobility", initialSection });
     setBottomTab("");
   };
 
@@ -182,7 +182,7 @@ const Index = () => {
       case "bookingSuccess":
         return <BookingSuccessView roomId={view.roomId} date={view.date} startTime={view.startTime} endTime={view.endTime} onBack={goHome} />;
       case "mobility":
-        return <ParkingMobilityView onBack={goHome} onViewBookings={goToBookingsList} />;
+        return <ParkingMobilityView onBack={goHome} onViewBookings={goToBookingsList} initialSection={view.initialSection} />;
       case "energy":
         return <EnergySharingView onBack={goHome} />;
       case "feedback":
@@ -319,7 +319,7 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      <ChatbotWidget onNavigateCarpool={goToMobility} />
+      <ChatbotWidget onNavigateCarpool={() => goToMobility("carpool")} />
       <BottomNav activeTab={bottomTab} onTabChange={handleBottomTab} isManager={authedUser.isManager} />
     </div>
   );
