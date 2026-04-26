@@ -324,6 +324,14 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
           <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
             <Car className="h-4 w-4 text-primary" /> {t("sharedCars")}
           </h3>
+          <StadiumMap
+            highlighted={highlightedZone}
+            onSelect={(z) => setHighlightedZone((prev) => (prev === z ? null : z))}
+            counts={sharedCars.reduce<Partial<Record<ZoneKey, number>>>((acc, c) => {
+              if (c.available) acc[c.locationKey] = (acc[c.locationKey] ?? 0) + 1;
+              return acc;
+            }, {})}
+          />
           <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
           {!validRange && (
             <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
@@ -332,15 +340,22 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
             {sharedCars.map((car, i) => {
               const slotTaken =
                 !validRange || !car.available || isMobilitySlotBooked("car", car.id, dateISO, startTime, endTime);
+              const isZoneActive = highlightedZone === car.locationKey;
               return (
                 <motion.div
                   key={car.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06 }}
+                  onMouseEnter={() => setHighlightedZone(car.locationKey)}
+                  onMouseLeave={() => setHighlightedZone(null)}
+                  onFocus={() => setHighlightedZone(car.locationKey)}
+                  onBlur={() => setHighlightedZone(null)}
+                  onTouchStart={() => setHighlightedZone(car.locationKey)}
                   className={cn(
                     "flex items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all",
-                    slotTaken && "grayscale opacity-50"
+                    slotTaken && "grayscale opacity-50",
+                    isZoneActive && "ring-2 ring-mobility-blue"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -349,7 +364,13 @@ const ParkingMobilityView = ({ onBack, onViewBookings }: ParkingMobilityViewProp
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">{car.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{t(car.locationKey)} · {car.type}</p>
+                      <p className={cn(
+                        "text-[11px] flex items-center gap-1",
+                        isZoneActive ? "text-mobility-blue font-semibold" : "text-muted-foreground"
+                      )}>
+                        <MapPin className="h-3 w-3" />
+                        {t(car.locationKey)} · {car.type}
+                      </p>
                     </div>
                   </div>
                   {!slotTaken ? (
