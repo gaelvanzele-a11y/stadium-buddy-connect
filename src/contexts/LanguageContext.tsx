@@ -342,6 +342,7 @@ const translations = {
     reserveSharedCar: "DEELAUTO RESERVEREN",
     hours: "uur",
     perHour: "/u",
+    perRide: "per rit",
     persons: "p",
     wifi: "Wi-Fi",
     projector: "Beamer",
