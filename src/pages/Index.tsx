@@ -319,7 +319,7 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      <ChatbotWidget />
+      <ChatbotWidget onNavigateCarpool={goToMobility} />
       <BottomNav activeTab={bottomTab} onTabChange={handleBottomTab} isManager={authedUser.isManager} />
     </div>
   );
