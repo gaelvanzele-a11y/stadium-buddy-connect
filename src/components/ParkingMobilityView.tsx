@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
+import MobilityConfirmDialog, { type MobilityPendingBooking } from "@/components/MobilityConfirmDialog";
 import { useBookings } from "@/contexts/BookingsContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
