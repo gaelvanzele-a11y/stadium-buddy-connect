@@ -25,10 +25,10 @@ const ParkingUsageDetailDialog = ({ open, onOpenChange }: Props) => {
 
   // Match the user-facing zones in ParkingMobilityView
   const zones = [
-    { key: "northGate", total: 400, occupied: 312 },
-    { key: "eastWing", total: 250, occupied: 98 },
-    { key: "southGate", total: 350, occupied: 340 },
-    { key: "westVIP", total: 80, occupied: 22 },
+    { key: "northGate" as const, total: 400, occupied: 312 },
+    { key: "eastWing" as const, total: 250, occupied: 98 },
+    { key: "southGate" as const, total: 350, occupied: 340 },
+    { key: "westVIP" as const, total: 80, occupied: 22 },
   ];
 
   const total = zones.reduce((a, z) => a + z.total, 0);
