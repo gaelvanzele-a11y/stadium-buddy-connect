@@ -325,12 +325,12 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1 text-xs">
-                      <Battery className={`h-3 w-3 ${isToday && bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
-                      <span className="text-muted-foreground">
-                        {isToday ? `${bike.battery}%` : t("fullyCharged")}
-                      </span>
-                    </div>
+                    {isToday && (
+                      <div className="flex items-center gap-1 text-xs">
+                        <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
+                        <span className="text-muted-foreground">{bike.battery}%</span>
+                      </div>
+                    )}
                     <span className="text-[11px] font-semibold text-mobility-blue">€2{t("perHour")}</span>
                     {!slotTaken ? (
                       <button
