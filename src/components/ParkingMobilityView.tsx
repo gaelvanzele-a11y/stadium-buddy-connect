@@ -285,9 +285,11 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
           )}
           <div className="space-y-2">
             {bikes.map((bike, i) => {
+              // For future dates, ignore real-time status (in-use/charging) — bike is bookable.
+              const effectiveStatus = isToday ? bike.status : "available";
               const slotTaken =
                 !validRange ||
-                bike.status !== "available" ||
+                effectiveStatus !== "available" ||
                 isMobilitySlotBooked("bike", bike.id, dateISO, startTime, endTime);
               const isZoneActive = highlightedZone === bike.locationKey;
               return (
@@ -324,8 +326,10 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <div className="flex items-center gap-1 text-xs">
-                      <Battery className={`h-3 w-3 ${bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
-                      <span className="text-muted-foreground">{bike.battery}%</span>
+                      <Battery className={`h-3 w-3 ${isToday && bike.battery < 30 ? "text-destructive" : "text-primary"}`} />
+                      <span className="text-muted-foreground">
+                        {isToday ? `${bike.battery}%` : t("fullyCharged")}
+                      </span>
                     </div>
                     <span className="text-[11px] font-semibold text-mobility-blue">€2{t("perHour")}</span>
                     {!slotTaken ? (
@@ -337,9 +341,9 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                       </button>
                     ) : (
                       <span className="text-[11px] font-semibold text-destructive">
-                        {bike.status === "in-use"
+                        {effectiveStatus === "in-use"
                           ? t("inUse")
-                          : bike.status === "charging"
+                          : effectiveStatus === "charging"
                             ? t("charging")
                             : t("reservedSlot")}
                       </span>
