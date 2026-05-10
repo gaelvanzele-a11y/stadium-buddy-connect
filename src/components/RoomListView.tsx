@@ -24,7 +24,8 @@ const toMin = (hhmm: string) => {
 };
 
 const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const dfLocale = lang === "nl" ? nl : enUS;
   const { isRoomSlotBooked } = useBookings();
   const [capacity, setCapacity] = useState("any");
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -75,7 +76,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
               <Users className="h-3.5 w-3.5 text-primary" />
-              {t("capacity")}: {capacity}
+              {t("capacity")}: {capacity === "any" ? t("noPreference") : capacity}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-40 p-2" align="start">
@@ -89,7 +90,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                     capacity === c ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
                   )}
                 >
-                  {c}
+                  {c === "any" ? t("noPreference") : c}
                 </button>
               ))}
             </div>
