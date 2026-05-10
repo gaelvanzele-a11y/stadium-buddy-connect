@@ -1,6 +1,7 @@
 import { CheckCircle2, Calendar, Clock, QrCode, Navigation } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { nl, enUS } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 
@@ -22,7 +23,7 @@ const BookingSuccessView = ({ roomId, date, startTime, endTime, onBack }: Bookin
     return h * 60 + (m || 0);
   };
   const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
-  const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
+  const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy", { locale: lang === "nl" ? nl : enUS });
 
   const handleDirections = () => {
     window.open(
