@@ -277,7 +277,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
               return acc;
             }, {})}
           />
-          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} dfLocale={dfLocale} />
           {!validRange && (
             <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
           )}
@@ -364,7 +364,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
               return acc;
             }, {})}
           />
-          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} dfLocale={dfLocale} />
           {!validRange && (
             <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
           )}
