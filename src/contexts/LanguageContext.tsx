@@ -585,6 +585,8 @@ const translations = {
     currentBalance: "Huidig saldo",
     validForAllSports: "Geldig voor alle sporten — Voetbal, Hockey & meer.",
     topUpAmount: "Oplaadbedrag",
+    customAmount: "Ander bedrag",
+    enterAmount: "Voer bedrag in €",
     topUpNow: "Opladen",
     topUpConfirmed: "Kaart opgeladen",
     purchaseConfirmed: "Aankoop bevestigd!",
