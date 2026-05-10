@@ -169,7 +169,7 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
         const dt = new Date(`${target.dateISO}T${time}:00`);
         if (!isNaN(dt.getTime())) {
           const minsUntil = (dt.getTime() - Date.now()) / 60000;
-          if (minsUntil < 24 * 60 && minsUntil > -60) {
+          if (minsUntil < 60 && minsUntil > -60) {
             lateFee = true;
           }
         }

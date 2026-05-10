@@ -41,7 +41,7 @@ const BookingsView = ({}: BookingsViewProps) => {
 
   const isLateCancel = (b: Booking) => {
     const mins = minutesUntilStart(b);
-    return mins !== null && mins < 24 * 60 && mins > -60;
+    return mins !== null && mins < 60 && mins > -60;
   };
 
   const handleConfirmCancel = () => {
