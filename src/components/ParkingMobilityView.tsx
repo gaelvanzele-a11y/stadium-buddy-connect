@@ -163,6 +163,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   const [offerSeats, setOfferSeats] = useState(3);
   const [offerDate, setOfferDate] = useState<Date | undefined>(new Date());
   const [offerTime, setOfferTime] = useState("08:00");
+  const [offerPrice, setOfferPrice] = useState<number>(3);
+  const [offerFree, setOfferFree] = useState(false);
 
   const handleOfferRide = () => {
     const oDateISO = offerDate ? format(offerDate, "yyyy-MM-dd") : "";
