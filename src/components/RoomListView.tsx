@@ -216,7 +216,10 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                   <div>
                     <h3 className="font-display text-sm font-bold text-foreground">{room.name}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {room.capacity}{t("persons")}, {room.featureKeys.join(", ")} - €{room.pricePerHour}{t("perHour")}
+                      {room.capacity}{t("persons")}, {room.featureKeys.map((k) => {
+                        const map: Record<string, TranslationKey> = { "Wi-Fi": "wifi", TV: "tv", Beamer: "projector", Coffee: "coffee" };
+                        return map[k] ? t(map[k]) : k;
+                      }).join(", ")} - €{room.pricePerHour}{t("perHour")}
                     </p>
                     <p className={cn(
                       "mt-1 text-[11px] font-semibold",
