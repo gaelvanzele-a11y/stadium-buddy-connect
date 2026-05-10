@@ -75,6 +75,20 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   const [endTime, setEndTime] = useState("16:00");
   const [highlightedZone, setHighlightedZone] = useState<ZoneKey | null>(null);
 
+  // Clamp start/end times when invalid (e.g. switched to today with past hours)
+  useEffect(() => {
+    const startOpts = startOptionsFor(date);
+    if (startOpts.length > 0 && !startOpts.includes(startTime)) {
+      const next = startOpts[0];
+      setStartTime(next);
+      const endOpts = endOptionsFor(date, next);
+      if (endOpts.length > 0 && !endOpts.includes(endTime)) setEndTime(endOpts[0]);
+      return;
+    }
+    const endOpts = endOptionsFor(date, startTime);
+    if (endOpts.length > 0 && !endOpts.includes(endTime)) setEndTime(endOpts[0]);
+  }, [date, startTime, endTime]);
+
   const parkingZones = [
     { zoneKey: "northGate" as const, total: 400, occupied: 312, evChargers: 12, evAvailable: 4 },
     { zoneKey: "eastWing" as const, total: 250, occupied: 98, evChargers: 8, evAvailable: 6 },
