@@ -68,9 +68,11 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   ];
 
   const carpoolRides = [
-    { id: "1", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride1Driver" as const, timeKey: "ride1Time" as const, seats: 3 },
-    { id: "2", fromKey: "ride2From" as const, toKey: "ride2To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 2 },
-    { id: "3", fromKey: "ride3From" as const, toKey: "ride3To" as const, driverKey: "ride3Driver" as const, timeKey: "ride3Time" as const, seats: 4 },
+    { id: "1", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride1Driver" as const, timeKey: "ride1Time" as const, seats: 3, price: 2 },
+    { id: "2", fromKey: "ride2From" as const, toKey: "ride2To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 2, price: 0 },
+    { id: "3", fromKey: "ride3From" as const, toKey: "ride3To" as const, driverKey: "ride3Driver" as const, timeKey: "ride3Time" as const, seats: 4, price: 5 },
+    { id: "4", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 3, price: 4 },
+    { id: "5", fromKey: "ride3From" as const, toKey: "ride2To" as const, driverKey: "ride3Driver" as const, timeKey: "ride1Time" as const, seats: 2, price: 0 },
   ];
 
   const totalSpaces = parkingZones.reduce((a, z) => a + z.total, 0);
