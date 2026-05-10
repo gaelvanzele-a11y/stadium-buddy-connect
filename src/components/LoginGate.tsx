@@ -23,6 +23,7 @@ const VALID_USERS: { username: string; password: string; isManager: boolean; dis
   { username: "hub manager", password: "1234", isManager: true, displayName: "Hub Manager" },
   { username: "hubmanager", password: "1234", isManager: true, displayName: "Hub Manager" },
   { username: "robyn van rompaey", password: "4321", isManager: false, displayName: "Robyn Van Rompaey" },
+  { username: "frans", password: "1234", isManager: false, displayName: "Frans" },
 ];
 
 const readLocalUsers = (): LocalUser[] => {
