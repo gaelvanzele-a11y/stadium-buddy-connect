@@ -578,6 +578,27 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("pricePerRide")}</label>
+                <input
+                  type="number"
+                  value={offerFree ? 0 : offerPrice}
+                  onChange={(e) => setOfferPrice(Math.max(0, Number(e.target.value) || 0))}
+                  min={0}
+                  step={0.5}
+                  disabled={offerFree}
+                  className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+                />
+                <label className="mt-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={offerFree}
+                    onChange={(e) => setOfferFree(e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  {t("offerForFree")}
+                </label>
+              </div>
               <button
                 onClick={handleOfferRide}
                 className="w-full rounded-xl bg-primary py-3 font-display text-sm font-bold text-primary-foreground"
