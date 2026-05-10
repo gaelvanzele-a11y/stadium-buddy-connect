@@ -245,7 +245,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
         ) : (
           filteredRooms.map((room, i) => {
             const taken = !validRange || !!(dateISO && isRoomSlotBooked(room.id, dateISO, startTime, endTime));
-            const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
+            const hours = Math.max(1, (slotMin(endTime) - slotMin(startTime)) / 60);
             return (
               <motion.div
                 key={room.id}
