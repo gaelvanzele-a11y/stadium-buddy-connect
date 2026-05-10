@@ -93,6 +93,7 @@ const translations = {
     mapAvailableHere: "available here",
     inUse: "in use",
     charging: "charging",
+    fullyCharged: "Fully charged",
     bike: "Bike",
     electric: "Electric",
     hybrid: "Hybrid",
