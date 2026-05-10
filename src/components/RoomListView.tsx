@@ -3,7 +3,7 @@ import { ArrowLeft, Search, Users, CalendarIcon, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { nl, enUS } from "date-fns/locale";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, type TranslationKey } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 import { useBookings } from "@/contexts/BookingsContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
