@@ -127,10 +127,18 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col bg-background px-5 pb-10 pt-6">
-      <div className="flex justify-end">
-        <LanguageToggle />
-      </div>
+    <div className="relative min-h-screen w-full">
+      <div
+        className="fixed inset-0 -z-10 bg-cover bg-center"
+        style={{ backgroundImage: `url(${loginBg})` }}
+        aria-hidden
+      />
+      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-accent/80 via-accent/70 to-background/95" aria-hidden />
+
+      <div className="mx-auto flex min-h-screen max-w-lg flex-col px-5 pb-10 pt-6">
+        <div className="flex justify-end">
+          <LanguageToggle />
+        </div>
 
       <div className="flex flex-1 flex-col justify-center">
         <AnimatePresence mode="wait">
