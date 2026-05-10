@@ -1,6 +1,7 @@
 import { ArrowLeft, Calendar, Clock, CreditCard, UserPlus, X, Mail } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { nl, enUS } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 
@@ -25,7 +26,7 @@ const BookingConfirmView = ({ roomId, date, startTime, endTime, onBack, onConfir
     return h * 60 + (m || 0);
   };
   const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
-  const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
+  const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy", { locale: lang === "nl" ? nl : enUS });
 
   const addInvitee = () => {
     const email = inviteEmail.trim();
