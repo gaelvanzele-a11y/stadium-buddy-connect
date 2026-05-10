@@ -127,14 +127,7 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
   };
 
   return (
-    <div className="relative min-h-screen w-full">
-      <div
-        className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${loginBg})` }}
-        aria-hidden
-      />
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/70 to-black/85" aria-hidden />
-
+    <div className="relative min-h-screen w-full bg-background">
       <div className="mx-auto flex min-h-screen max-w-lg flex-col px-5 pb-10 pt-6">
         <div className="flex justify-end">
           <LanguageToggle />
