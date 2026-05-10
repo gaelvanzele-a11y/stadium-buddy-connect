@@ -58,6 +58,8 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirm, setRegConfirm] = useState("");
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirm, setShowRegConfirm] = useState(false);
 
   const resetMessages = () => {
     setError("");
