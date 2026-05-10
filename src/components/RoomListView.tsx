@@ -16,11 +16,38 @@ interface RoomListViewProps {
 }
 
 const capacityOptions = ["any", "1-4", "5-10", "10-20", "20+"];
-const hourOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+// Selectable times: 08:00 .. 23:00 plus 00:00 (midnight, only valid as end)
+const hourOptions = [
+  "08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00",
+  "16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","00:00",
+];
 
 const toMin = (hhmm: string) => {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + (m || 0);
+};
+
+const slotMin = (hhmm: string) => (hhmm === "00:00" ? 24 * 60 : toMin(hhmm));
+
+const isSameDay = (a: Date | undefined, b: Date) =>
+  !!a && a.toDateString() === b.toDateString();
+
+const nowMinutes = () => {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+};
+
+const startOptionsFor = (date: Date | undefined) => {
+  const isToday = isSameDay(date, new Date());
+  const cutoff = isToday ? nowMinutes() : -1;
+  return hourOptions.filter((tm) => tm !== "00:00" && slotMin(tm) > cutoff);
+};
+
+const endOptionsFor = (date: Date | undefined, startTime: string) => {
+  const isToday = isSameDay(date, new Date());
+  const cutoff = isToday ? nowMinutes() : -1;
+  const startM = slotMin(startTime);
+  return hourOptions.filter((tm) => slotMin(tm) > startM && slotMin(tm) > cutoff);
 };
 
 const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
