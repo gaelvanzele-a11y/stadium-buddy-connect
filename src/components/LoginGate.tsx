@@ -49,6 +49,7 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
   // Login state
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
