@@ -254,14 +254,14 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-mobility-blue" />
+                      <MapPin className={`h-4 w-4 ${free < 20 ? "text-destructive" : "text-primary"}`} />
                       <span className="font-display text-sm font-bold text-foreground">{t(zone.zoneKey)}</span>
                     </div>
                     <span className={`font-display text-lg font-extrabold ${free < 20 ? "text-destructive" : "text-primary"}`}>
                       {free}
                     </span>
                   </div>
-                  <Progress value={pct} className={`mt-2 h-1.5 bg-secondary ${pct > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-mobility-blue"}`} />
+                  <Progress value={pct} className={`mt-2 h-1.5 bg-secondary ${pct > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-primary"}`} />
                   <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Zap className="h-3 w-3" /> {zone.evAvailable}/{zone.evChargers} {t("evChargers")}
                   </div>
