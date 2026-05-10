@@ -236,8 +236,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="mb-5 rounded-xl bg-card p-5 card-shadow">
             <p className="text-sm text-muted-foreground">{t("parkingSpaces")}</p>
-            <p className="font-display text-4xl font-extrabold text-mobility-blue">{totalFree}</p>
-            <Progress value={(totalOccupied / totalSpaces) * 100} className="mt-3 h-2 bg-secondary [&>div]:bg-mobility-blue" />
+            <p className={`font-display text-4xl font-extrabold ${totalFree < 20 ? "text-destructive" : "text-primary"}`}>{totalFree}</p>
+            <Progress value={(totalOccupied / totalSpaces) * 100} className={`mt-3 h-2 bg-secondary ${(totalOccupied / totalSpaces) * 100 > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-primary"}`} />
           </div>
 
           <div className="space-y-3">
@@ -254,14 +254,14 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-mobility-blue" />
+                      <MapPin className={`h-4 w-4 ${free < 20 ? "text-destructive" : "text-primary"}`} />
                       <span className="font-display text-sm font-bold text-foreground">{t(zone.zoneKey)}</span>
                     </div>
                     <span className={`font-display text-lg font-extrabold ${free < 20 ? "text-destructive" : "text-primary"}`}>
                       {free}
                     </span>
                   </div>
-                  <Progress value={pct} className={`mt-2 h-1.5 bg-secondary ${pct > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-mobility-blue"}`} />
+                  <Progress value={pct} className={`mt-2 h-1.5 bg-secondary ${pct > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-primary"}`} />
                   <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Zap className="h-3 w-3" /> {zone.evAvailable}/{zone.evChargers} {t("evChargers")}
                   </div>
@@ -310,7 +310,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   className={cn(
                     "flex items-center justify-between rounded-xl bg-card p-3 card-shadow transition-all",
                     slotTaken && "grayscale opacity-50",
-                    isZoneActive && "ring-2 ring-mobility-blue"
+                    isZoneActive && "ring-2 ring-primary"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -321,7 +321,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                       <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
                       <p className={cn(
                         "text-[11px] flex items-center gap-1",
-                        isZoneActive ? "text-mobility-blue font-semibold" : "text-muted-foreground"
+                        isZoneActive ? "text-primary font-semibold" : "text-muted-foreground"
                       )}>
                         <MapPin className="h-3 w-3" />
                         {t(bike.locationKey)}
@@ -397,7 +397,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   className={cn(
                     "flex items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all",
                     slotTaken && "grayscale opacity-50",
-                    isZoneActive && "ring-2 ring-mobility-blue"
+                    isZoneActive && "ring-2 ring-primary"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -408,7 +408,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                       <p className="text-sm font-bold text-foreground">{car.name}</p>
                       <p className={cn(
                         "text-[11px] flex items-center gap-1",
-                        isZoneActive ? "text-mobility-blue font-semibold" : "text-muted-foreground"
+                        isZoneActive ? "text-primary font-semibold" : "text-muted-foreground"
                       )}>
                         <MapPin className="h-3 w-3" />
                         {t(car.locationKey)} · {t(car.type as "electric" | "hybrid")}
