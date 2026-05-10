@@ -187,13 +187,6 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
                 {t("backToWelcome")}
               </button>
 
-              <div className="mb-6 text-center">
-                <h1 className="font-display text-2xl font-extrabold leading-tight text-accent">
-                  {t("loginWelcome")}
-                </h1>
-                <p className="mt-2 text-sm font-medium text-foreground/80">{t("landingTagline")}</p>
-              </div>
-
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-5 rounded-2xl bg-card p-6 shadow-2xl border border-border/50">
                   <div className="text-center">
