@@ -20,8 +20,8 @@ interface Props {
 }
 
 const ParkingUsageDetailDialog = ({ open, onOpenChange }: Props) => {
-  const { language } = useLanguage();
-  const nl = language === "nl";
+  const { lang } = useLanguage();
+  const nl = lang === "nl";
 
   const total = 320;
   const occupied = 230;
