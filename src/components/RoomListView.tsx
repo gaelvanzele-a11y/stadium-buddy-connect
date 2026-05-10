@@ -60,6 +60,20 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
   const [endTime, setEndTime] = useState("16:00");
   const [search, setSearch] = useState("");
 
+  // Clamp invalid times when date changes (e.g. switching to today)
+  useEffect(() => {
+    const startOpts = startOptionsFor(date);
+    if (startOpts.length > 0 && !startOpts.includes(startTime)) {
+      const next = startOpts[0];
+      setStartTime(next);
+      const endOpts = endOptionsFor(date, next);
+      if (endOpts.length > 0 && !endOpts.includes(endTime)) setEndTime(endOpts[0]);
+      return;
+    }
+    const endOpts = endOptionsFor(date, startTime);
+    if (endOpts.length > 0 && !endOpts.includes(endTime)) setEndTime(endOpts[0]);
+  }, [date, startTime, endTime]);
+
   const capacityRange = (() => {
     if (capacity === "any") return [0, Infinity] as const;
     if (capacity === "1-4") return [1, 4] as const;
@@ -69,7 +83,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
   })();
 
   const dateISO = date ? format(date, "yyyy-MM-dd") : "";
-  const validRange = toMin(endTime) > toMin(startTime);
+  const validRange = slotMin(endTime) > slotMin(startTime);
 
   const filteredRooms = rooms.filter((r) => {
     const matchesCapacity = r.capacity >= capacityRange[0] && r.capacity <= capacityRange[1];
