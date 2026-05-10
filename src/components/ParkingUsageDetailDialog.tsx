@@ -159,6 +159,39 @@ const ParkingUsageDetailDialog = ({ open, onOpenChange }: Props) => {
           </div>
         </div>
 
+        {/* Per zone */}
+        <div className="rounded-xl bg-card p-4 card-shadow">
+          <p className="mb-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5" />
+            {nl ? "Per zone" : "By zone"}
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {zones.map((z) => {
+              const p = Math.round((z.occupied / z.total) * 100);
+              const almostFull = p >= 90;
+              return (
+                <div key={z.key} className="rounded-lg bg-secondary/40 p-3">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-sm font-medium text-foreground">{t(z.key)}</span>
+                    <span className={`text-[11px] font-bold ${almostFull ? "text-destructive" : "text-primary"}`}>
+                      {p}%
+                    </span>
+                  </div>
+                  <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                    <div
+                      className={`h-full ${almostFull ? "bg-destructive" : "bg-primary"}`}
+                      style={{ width: `${p}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {z.occupied}/{z.total} {nl ? "plaatsen bezet" : "spots occupied"}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Trend */}
         <div className="rounded-xl bg-card p-4 card-shadow">
           <p className="mb-2 text-xs font-medium text-muted-foreground">
