@@ -195,7 +195,11 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-5 rounded-2xl bg-card/95 p-6 backdrop-blur-md shadow-2xl border border-border/50">
+                <div className="space-y-5 rounded-2xl bg-card p-6 shadow-2xl border border-border/50">
+                  <div className="text-center">
+                    <h2 className="font-display text-xl font-extrabold text-accent">{t("signIn")}</h2>
+                    <p className="mt-1 text-sm text-foreground/70">{t("loginSubtitle")}</p>
+                  </div>
                   <div>
                     <label className="mb-2 block text-xs font-semibold text-muted-foreground">
                       {t("username")}
