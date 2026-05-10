@@ -559,9 +559,9 @@ const translations = {
     addInvitee: "Voeg toe",
     inviteesAdded: "genodigden toegevoegd",
     // Login gate
-    loginWelcome: "Welkom bij Stadium Connect Hub",
+    loginWelcome: "Welkom bij het Mijnstadion",
     loginSubtitle: "Log in om verder te gaan",
-    landingTagline: "Jouw toegang tot deelmobiliteit, werkplekken en lokale energie",
+    landingTagline: "Jouw stadionhub voor werkplekken, mobiliteit en energie",
     signIn: "Inloggen",
     signUp: "Registreren",
     register: "Registreren",

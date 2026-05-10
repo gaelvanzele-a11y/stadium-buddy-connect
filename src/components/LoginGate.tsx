@@ -3,7 +3,7 @@ import { User, Lock, LogIn, UserPlus, ArrowLeft, Building2, Eye, EyeOff } from "
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
-import loginBg from "@/assets/login-bg.jpg";
+
 
 interface LoginGateProps {
   onLogin: (username: string, isManager: boolean) => void;
@@ -127,14 +127,7 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
   };
 
   return (
-    <div className="relative min-h-screen w-full">
-      <div
-        className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: `url(${loginBg})` }}
-        aria-hidden
-      />
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/70 to-black/85" aria-hidden />
-
+    <div className="relative min-h-screen w-full bg-background">
       <div className="mx-auto flex min-h-screen max-w-lg flex-col px-5 pb-10 pt-6">
         <div className="flex justify-end">
           <LanguageToggle />
@@ -195,10 +188,10 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
               </button>
 
               <div className="mb-6 text-center">
-                <h1 className="font-display text-2xl font-extrabold leading-tight text-white drop-shadow-lg">
-                  {t("signIn")}
+                <h1 className="font-display text-2xl font-extrabold leading-tight text-accent">
+                  {t("loginWelcome")}
                 </h1>
-                <p className="mt-2 text-sm font-medium text-white/90 drop-shadow">{t("loginSubtitle")}</p>
+                <p className="mt-2 text-sm font-medium text-foreground/80">{t("landingTagline")}</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
