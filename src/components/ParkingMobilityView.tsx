@@ -19,11 +19,41 @@ interface ParkingMobilityViewProps {
   initialSection?: "parking" | "bikes" | "shared" | "carpool";
 }
 
-const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+// Selectable times: 08:00 .. 23:00 plus 00:00 (midnight, only valid as end time)
+const timeOptions = [
+  "08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00",
+  "16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","00:00",
+];
 
 const toMin = (hhmm: string) => {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + (m || 0);
+};
+
+// Treat "00:00" as end-of-day (1440) for ordering
+const slotMin = (hhmm: string) => (hhmm === "00:00" ? 24 * 60 : toMin(hhmm));
+
+const isSameDay = (a: Date | undefined, b: Date) =>
+  !!a && a.toDateString() === b.toDateString();
+
+const nowMinutes = () => {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+};
+
+// Time options available as a START time (excludes 00:00, hides past hours when today)
+const startOptionsFor = (date: Date | undefined) => {
+  const isToday = isSameDay(date, new Date());
+  const cutoff = isToday ? nowMinutes() : -1;
+  return timeOptions.filter((tm) => tm !== "00:00" && slotMin(tm) > cutoff);
+};
+
+// Time options available as an END time (must be after start; if today, after now)
+const endOptionsFor = (date: Date | undefined, startTime: string) => {
+  const isToday = isSameDay(date, new Date());
+  const cutoff = isToday ? nowMinutes() : -1;
+  const startM = slotMin(startTime);
+  return timeOptions.filter((tm) => slotMin(tm) > startM && slotMin(tm) > cutoff);
 };
 
 const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: ParkingMobilityViewProps) => {
