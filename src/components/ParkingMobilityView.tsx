@@ -146,8 +146,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
       location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
       date: t(ride.timeKey),
       time: "",
-      totalCost: 3,
-      costBreakdown: `1 ${t("perRide")} × €3`,
+      totalCost: ride.price,
+      costBreakdown: ride.price === 0 ? t("free") : `1 × €${ride.price}`,
     });
   };
 
