@@ -230,9 +230,9 @@ const translations = {
     addInvitee: "Add",
     inviteesAdded: "invitees added",
     // Login gate
-    loginWelcome: "Welcome to Mijnstadion",
+    loginWelcome: "Welcome to Stadium Connect Hub",
     loginSubtitle: "Sign in to continue",
-    landingTagline: "Your stadium hub for workspaces, mobility and energy.",
+    landingTagline: "Your access to shared mobility, workspaces and local energy",
     signIn: "Sign In",
     signUp: "Sign Up",
     register: "Register",
