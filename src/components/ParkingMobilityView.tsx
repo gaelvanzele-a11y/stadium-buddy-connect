@@ -580,18 +580,24 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                     </PopoverTrigger>
                     <PopoverContent className="w-40 p-2" align="start">
                       <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
-                        {timeOptions.map((tm) => (
-                          <button
-                            key={tm}
-                            onClick={() => setOfferTime(tm)}
-                            className={cn(
-                              "rounded-md px-2 py-1.5 text-xs",
-                              offerTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
-                            )}
-                          >
-                            {tm}
-                          </button>
-                        ))}
+                        {(() => {
+                          const opts = startOptionsFor(offerDate);
+                          if (opts.length === 0) {
+                            return <p className="col-span-3 px-1 py-2 text-[11px] text-muted-foreground">{t("noResults")}</p>;
+                          }
+                          return opts.map((tm) => (
+                            <button
+                              key={tm}
+                              onClick={() => setOfferTime(tm)}
+                              className={cn(
+                                "rounded-md px-2 py-1.5 text-xs",
+                                offerTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                              )}
+                            >
+                              {tm}
+                            </button>
+                          ));
+                        })()}
                       </div>
                     </PopoverContent>
                   </Popover>
