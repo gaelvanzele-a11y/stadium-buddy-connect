@@ -23,6 +23,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import { LogOut } from "lucide-react";
 import { rooms } from "@/data/rooms";
 import { format } from "date-fns";
+import { nl, enUS } from "date-fns/locale";
 
 export type AppView =
   | { type: "home" }
@@ -112,7 +113,7 @@ const Index = () => {
     const room = rooms.find((r) => r.id === roomId);
     if (room) {
       const dateISO = format(date, "yyyy-MM-dd");
-      const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy");
+      const dateLabel = format(date, lang === "nl" ? "d MMM yyyy" : "MMM d, yyyy", { locale: lang === "nl" ? nl : enUS });
       const newBooking: Booking = {
         id: Date.now().toString(),
         kind: "room",
