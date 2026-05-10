@@ -115,7 +115,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   const todayISO = format(new Date(), "yyyy-MM-dd");
   const isToday = dateISO === todayISO;
   const dateLabel = date ? format(date, "d MMM yyyy", { locale: dfLocale }) : todayLabel;
-  const validRange = toMin(endTime) > toMin(startTime);
+  const validRange = slotMin(endTime) > slotMin(startTime);
   const slotLabel = `${startTime} - ${endTime}`;
 
   const confirmBooking = (
