@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Users, Zap, Car, Activity, Calendar, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
+import ParkingUsageDetailDialog from "./ParkingUsageDetailDialog";
 
 const GovernanceDashboard = () => {
   const { t } = useLanguage();
+  const [parkingOpen, setParkingOpen] = useState(false);
 
   const kpis = [
     { label: t("kpiRoomOccupancy"), value: "78%", pct: 78, icon: Calendar, color: "text-primary" },
