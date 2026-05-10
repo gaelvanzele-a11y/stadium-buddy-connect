@@ -605,9 +605,10 @@ interface DateTimeFilterProps {
   endTime: string;
   setEndTime: (t: string) => void;
   t: (k: string) => string;
+  dfLocale: typeof nl;
 }
 
-const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEndTime, t }: DateTimeFilterProps) => (
+const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEndTime, t, dfLocale }: DateTimeFilterProps) => (
   <div className="mb-4 flex flex-wrap gap-2 text-xs">
     <Popover>
       <PopoverTrigger asChild>
