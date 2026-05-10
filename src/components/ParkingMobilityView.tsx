@@ -310,7 +310,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   className={cn(
                     "flex items-center justify-between rounded-xl bg-card p-3 card-shadow transition-all",
                     slotTaken && "grayscale opacity-50",
-                    isZoneActive && "ring-2 ring-mobility-blue"
+                    isZoneActive && "ring-2 ring-primary"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -321,7 +321,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                       <p className="text-sm font-medium text-foreground">{t("bike")} {bike.id}</p>
                       <p className={cn(
                         "text-[11px] flex items-center gap-1",
-                        isZoneActive ? "text-mobility-blue font-semibold" : "text-muted-foreground"
+                        isZoneActive ? "text-primary font-semibold" : "text-muted-foreground"
                       )}>
                         <MapPin className="h-3 w-3" />
                         {t(bike.locationKey)}
@@ -397,7 +397,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   className={cn(
                     "flex items-center justify-between rounded-xl bg-card p-4 card-shadow transition-all",
                     slotTaken && "grayscale opacity-50",
-                    isZoneActive && "ring-2 ring-mobility-blue"
+                    isZoneActive && "ring-2 ring-primary"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -408,7 +408,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                       <p className="text-sm font-bold text-foreground">{car.name}</p>
                       <p className={cn(
                         "text-[11px] flex items-center gap-1",
-                        isZoneActive ? "text-mobility-blue font-semibold" : "text-muted-foreground"
+                        isZoneActive ? "text-primary font-semibold" : "text-muted-foreground"
                       )}>
                         <MapPin className="h-3 w-3" />
                         {t(car.locationKey)} · {t(car.type as "electric" | "hybrid")}
