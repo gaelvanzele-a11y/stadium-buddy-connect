@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Car, Zap, Accessibility, Clock } from "lucide-react";
+import { Car, Zap, Accessibility, Clock, MapPin } from "lucide-react";
 import {
   ResponsiveContainer,
   PieChart,
@@ -20,11 +20,19 @@ interface Props {
 }
 
 const ParkingUsageDetailDialog = ({ open, onOpenChange }: Props) => {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const nl = lang === "nl";
 
-  const total = 320;
-  const occupied = 230;
+  // Match the user-facing zones in ParkingMobilityView
+  const zones = [
+    { key: "northGate", total: 400, occupied: 312 },
+    { key: "eastWing", total: 250, occupied: 98 },
+    { key: "southGate", total: 350, occupied: 340 },
+    { key: "westVIP", total: 80, occupied: 22 },
+  ];
+
+  const total = zones.reduce((a, z) => a + z.total, 0);
+  const occupied = zones.reduce((a, z) => a + z.occupied, 0);
   const free = total - occupied;
   const pct = Math.round((occupied / total) * 100);
 
@@ -37,22 +45,22 @@ const ParkingUsageDetailDialog = ({ open, onOpenChange }: Props) => {
     {
       label: nl ? "Standaard plaatsen" : "Standard spots",
       icon: Car,
-      occupied: 180,
-      total: 250,
+      occupied: Math.round(occupied * 0.82),
+      total: Math.round(total * 0.85),
       color: "text-primary",
     },
     {
       label: nl ? "EV-laadplaatsen" : "EV charging spots",
       icon: Zap,
-      occupied: 38,
-      total: 50,
+      occupied: Math.round(occupied * 0.12),
+      total: Math.round(total * 0.10),
       color: "text-energy-leaf",
     },
     {
       label: nl ? "Mindervaliden" : "Disabled spots",
       icon: Accessibility,
-      occupied: 12,
-      total: 20,
+      occupied: Math.round(occupied * 0.06),
+      total: Math.round(total * 0.05),
       color: "text-accent",
     },
   ];
