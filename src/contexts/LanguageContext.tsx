@@ -325,7 +325,7 @@ const translations = {
     cancelRide: "Cancel ride",
     cancelConfirmTitle: "Cancel this booking?",
     cancelFreeDesc: "You are more than 1 hour before the start time. Cancellation is free.",
-    cancelLateDesc: "Cancelling within 1 hour before the start results in a €5 administrative fee. Do you wish to proceed?",
+    cancelLateDesc: "Note: cancelling less than 1 hour in advance? We charge €5 cancellation fee. Are you sure you want to cancel?",
     keepBooking: "Keep booking",
     confirmCancel: "Confirm cancellation",
     cancellationFree: "Cancellation confirmed — no fee charged.",
