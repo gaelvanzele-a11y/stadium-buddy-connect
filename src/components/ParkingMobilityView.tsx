@@ -138,7 +138,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
     });
   };
 
-  const hours = Math.max(1, (toMin(endTime) - toMin(startTime)) / 60);
+  const hours = Math.max(1, (slotMin(endTime) - slotMin(startTime)) / 60);
 
   const handleRentBike = (bikeId: string, locationKey: "northGate" | "eastWing" | "southGate" | "westVIP") => {
     setPending({
