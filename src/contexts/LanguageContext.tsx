@@ -417,6 +417,7 @@ const translations = {
     mapAvailableHere: "hier beschikbaar",
     inUse: "in gebruik",
     charging: "opladen",
+    fullyCharged: "Volledig opgeladen",
     bike: "Fiets",
     electric: "Elektrisch",
     hybrid: "Hybride",
