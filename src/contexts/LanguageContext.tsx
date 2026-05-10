@@ -259,6 +259,8 @@ const translations = {
     currentBalance: "Current balance",
     validForAllSports: "Valid for all sports — Football, Hockey & more.",
     topUpAmount: "Top-up amount",
+    customAmount: "Custom amount",
+    enterAmount: "Enter amount in €",
     topUpNow: "Top up",
     topUpConfirmed: "Card topped up",
     purchaseConfirmed: "Purchase Confirmed!",
