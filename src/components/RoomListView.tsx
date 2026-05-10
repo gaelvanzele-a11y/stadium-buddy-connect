@@ -3,7 +3,7 @@ import { ArrowLeft, Search, Users, CalendarIcon, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { nl, enUS } from "date-fns/locale";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, type TranslationKey } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 import { useBookings } from "@/contexts/BookingsContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -216,7 +216,10 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                   <div>
                     <h3 className="font-display text-sm font-bold text-foreground">{room.name}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {room.capacity}{t("persons")}, {room.featureKeys.join(", ")} - €{room.pricePerHour}{t("perHour")}
+                      {room.capacity}{t("persons")}, {room.featureKeys.map((k) => {
+                        const map: Record<string, TranslationKey> = { "Wi-Fi": "wifi", TV: "tv", Beamer: "projector", Coffee: "coffee" };
+                        return map[k] ? t(map[k]) : k;
+                      }).join(", ")} - €{room.pricePerHour}{t("perHour")}
                     </p>
                     <p className={cn(
                       "mt-1 text-[11px] font-semibold",
