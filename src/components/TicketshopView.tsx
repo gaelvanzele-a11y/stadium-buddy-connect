@@ -64,6 +64,8 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
   const [sportFilter, setSportFilter] = useState<"all" | "football" | "hockey">("all");
   const [selections, setSelections] = useState<Record<string, SeatSelection>>({});
   const [topUp, setTopUp] = useState<number>(20);
+  const [isCustomTopUp, setIsCustomTopUp] = useState(false);
+  const [customTopUp, setCustomTopUp] = useState<string>("");
   const [pending, setPending] = useState<PendingPayment | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
 
