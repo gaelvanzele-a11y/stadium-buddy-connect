@@ -68,9 +68,11 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   ];
 
   const carpoolRides = [
-    { id: "1", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride1Driver" as const, timeKey: "ride1Time" as const, seats: 3 },
-    { id: "2", fromKey: "ride2From" as const, toKey: "ride2To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 2 },
-    { id: "3", fromKey: "ride3From" as const, toKey: "ride3To" as const, driverKey: "ride3Driver" as const, timeKey: "ride3Time" as const, seats: 4 },
+    { id: "1", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride1Driver" as const, timeKey: "ride1Time" as const, seats: 3, price: 2 },
+    { id: "2", fromKey: "ride2From" as const, toKey: "ride2To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 2, price: 0 },
+    { id: "3", fromKey: "ride3From" as const, toKey: "ride3To" as const, driverKey: "ride3Driver" as const, timeKey: "ride3Time" as const, seats: 4, price: 5 },
+    { id: "4", fromKey: "ride1From" as const, toKey: "ride1To" as const, driverKey: "ride2Driver" as const, timeKey: "ride2Time" as const, seats: 3, price: 4 },
+    { id: "5", fromKey: "ride3From" as const, toKey: "ride2To" as const, driverKey: "ride3Driver" as const, timeKey: "ride1Time" as const, seats: 2, price: 0 },
   ];
 
   const totalSpaces = parkingZones.reduce((a, z) => a + z.total, 0);
@@ -144,8 +146,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
       location: `${t(ride.fromKey)} → ${t(ride.toKey)}`,
       date: t(ride.timeKey),
       time: "",
-      totalCost: 3,
-      costBreakdown: `1 ${t("perRide")} × €3`,
+      totalCost: ride.price,
+      costBreakdown: ride.price === 0 ? t("free") : `1 × €${ride.price}`,
     });
   };
 
@@ -161,6 +163,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   const [offerSeats, setOfferSeats] = useState(3);
   const [offerDate, setOfferDate] = useState<Date | undefined>(new Date());
   const [offerTime, setOfferTime] = useState("08:00");
+  const [offerPrice, setOfferPrice] = useState<number>(3);
+  const [offerFree, setOfferFree] = useState(false);
 
   const handleOfferRide = () => {
     const oDateISO = offerDate ? format(offerDate, "yyyy-MM-dd") : "";
@@ -476,7 +480,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">{ride.seats} {t("rideSeats")}</p>
-                      <p className="text-[11px] font-semibold text-mobility-blue">€3 {t("perRide") }</p>
+                      <p className="text-[11px] font-semibold text-mobility-blue">{ride.price === 0 ? t("free") : `€${ride.price}`}</p>
                       <button
                         onClick={() => handleRequestRide(ride)}
                         className="mt-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
@@ -573,6 +577,27 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                   max={7}
                   className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("pricePerRide")}</label>
+                <input
+                  type="number"
+                  value={offerFree ? 0 : offerPrice}
+                  onChange={(e) => setOfferPrice(Math.max(0, Number(e.target.value) || 0))}
+                  min={0}
+                  step={0.5}
+                  disabled={offerFree}
+                  className="w-full rounded-lg border border-border bg-background py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+                />
+                <label className="mt-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={offerFree}
+                    onChange={(e) => setOfferFree(e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  {t("offerForFree")}
+                </label>
               </div>
               <button
                 onClick={handleOfferRide}
