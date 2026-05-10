@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Search, Users, CalendarIcon, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { nl, enUS } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { rooms } from "@/data/rooms";
 import { useBookings } from "@/contexts/BookingsContext";
