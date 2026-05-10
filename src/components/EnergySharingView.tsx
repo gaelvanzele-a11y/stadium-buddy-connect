@@ -92,10 +92,15 @@ const EnergySharingView = ({ onBack }: { onBack: () => void }) => {
             </div>
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <p className="text-sm font-bold text-energy-leaf">{n.allocation} kW</p>
-                <p className="text-[11px] text-muted-foreground">{n.active ? t("receiving") : t("offline")}</p>
+                {n.active ? (
+                  <>
+                    <p className="text-sm font-bold text-energy-leaf">{n.allocation} kW</p>
+                    <p className="text-[11px] text-muted-foreground">{t("receiving")}</p>
+                  </>
+                ) : (
+                  <p className="text-sm font-bold text-destructive">{t("offline")}</p>
+                )}
               </div>
-              {n.active && <ArrowRight className="h-3.5 w-3.5 text-energy-leaf/50" />}
             </div>
           </motion.div>
         ))}
