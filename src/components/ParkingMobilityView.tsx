@@ -706,24 +706,30 @@ const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEn
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="start">
         <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
-          {timeOptions.slice(0, -1).map((tm) => (
-            <button
-              key={tm}
-              onClick={() => {
-                setStartTime(tm);
-                if (toMin(endTime) <= toMin(tm)) {
-                  const next = timeOptions[timeOptions.indexOf(tm) + 1];
-                  if (next) setEndTime(next);
-                }
-              }}
-              className={cn(
-                "rounded-md px-2 py-1.5 text-xs",
-                startTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
-              )}
-            >
-              {tm}
-            </button>
-          ))}
+          {(() => {
+            const opts = startOptionsFor(date);
+            if (opts.length === 0) {
+              return <p className="col-span-3 px-1 py-2 text-[11px] text-muted-foreground">{t("noResults")}</p>;
+            }
+            return opts.map((tm) => (
+              <button
+                key={tm}
+                onClick={() => {
+                  setStartTime(tm);
+                  if (slotMin(endTime) <= slotMin(tm)) {
+                    const next = timeOptions[timeOptions.indexOf(tm) + 1];
+                    if (next) setEndTime(next);
+                  }
+                }}
+                className={cn(
+                  "rounded-md px-2 py-1.5 text-xs",
+                  startTime === tm ? "bg-primary text-primary-foreground" : "hover:bg-secondary"
+                )}
+              >
+                {tm}
+              </button>
+            ));
+          })()}
         </div>
       </PopoverContent>
     </Popover>
@@ -737,9 +743,12 @@ const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEn
       </PopoverTrigger>
       <PopoverContent className="w-40 p-2" align="start">
         <div className="grid max-h-64 grid-cols-3 gap-1 overflow-y-auto">
-          {timeOptions
-            .filter((tm) => toMin(tm) > toMin(startTime))
-            .map((tm) => (
+          {(() => {
+            const opts = endOptionsFor(date, startTime);
+            if (opts.length === 0) {
+              return <p className="col-span-3 px-1 py-2 text-[11px] text-muted-foreground">{t("noResults")}</p>;
+            }
+            return opts.map((tm) => (
               <button
                 key={tm}
                 onClick={() => setEndTime(tm)}
@@ -750,7 +759,8 @@ const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEn
               >
                 {tm}
               </button>
-            ))}
+            ));
+          })()}
         </div>
       </PopoverContent>
     </Popover>
