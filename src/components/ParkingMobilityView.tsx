@@ -236,8 +236,8 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="mb-5 rounded-xl bg-card p-5 card-shadow">
             <p className="text-sm text-muted-foreground">{t("parkingSpaces")}</p>
-            <p className="font-display text-4xl font-extrabold text-mobility-blue">{totalFree}</p>
-            <Progress value={(totalOccupied / totalSpaces) * 100} className="mt-3 h-2 bg-secondary [&>div]:bg-mobility-blue" />
+            <p className={`font-display text-4xl font-extrabold ${totalFree < 20 ? "text-destructive" : "text-primary"}`}>{totalFree}</p>
+            <Progress value={(totalOccupied / totalSpaces) * 100} className={`mt-3 h-2 bg-secondary ${(totalOccupied / totalSpaces) * 100 > 90 ? "[&>div]:bg-destructive" : "[&>div]:bg-primary"}`} />
           </div>
 
           <div className="space-y-3">
