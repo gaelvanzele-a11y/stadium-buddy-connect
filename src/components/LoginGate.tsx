@@ -392,6 +392,7 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );
