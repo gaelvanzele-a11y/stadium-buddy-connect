@@ -3,7 +3,7 @@ import { User, Lock, LogIn, UserPlus, ArrowLeft, Building2, Eye, EyeOff } from "
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
-import loginBg from "@/assets/login-bg.jpg";
+
 
 interface LoginGateProps {
   onLogin: (username: string, isManager: boolean) => void;
