@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Car, Bike, Battery, Zap, MapPin, Users, Truck, CalendarIcon, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { nl, enUS } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import MobilityBookingDialog, { type MobilityBookingInfo } from "@/components/MobilityBookingDialog";
@@ -26,7 +27,8 @@ const toMin = (hhmm: string) => {
 };
 
 const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: ParkingMobilityViewProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const dfLocale = lang === "nl" ? nl : enUS;
   const { addBooking, isMobilitySlotBooked } = useBookings();
   const [activeSection, setActiveSection] = useState<"parking" | "bikes" | "shared" | "carpool">(initialSection ?? "parking");
   const [carpoolTab, setCarpoolTab] = useState<"find" | "offer">("find");
@@ -78,7 +80,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
   const todayLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
   const dateISO = date ? format(date, "yyyy-MM-dd") : "";
-  const dateLabel = date ? format(date, "d MMM yyyy") : todayLabel;
+  const dateLabel = date ? format(date, "d MMM yyyy", { locale: dfLocale }) : todayLabel;
   const validRange = toMin(endTime) > toMin(startTime);
   const slotLabel = `${startTime} - ${endTime}`;
 
@@ -160,7 +162,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
 
   const handleOfferRide = () => {
     const oDateISO = offerDate ? format(offerDate, "yyyy-MM-dd") : "";
-    const oDateLabel = offerDate ? format(offerDate, "d MMM yyyy") : todayLabel;
+    const oDateLabel = offerDate ? format(offerDate, "d MMM yyyy", { locale: dfLocale }) : todayLabel;
     const info: MobilityBookingInfo = {
       title: t("offeredRide"),
       itemName: `${offerSeats} ${t("seatsAvailable")}`,
@@ -275,7 +277,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
               return acc;
             }, {})}
           />
-          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} dfLocale={dfLocale} />
           {!validRange && (
             <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
           )}
@@ -362,7 +364,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
               return acc;
             }, {})}
           />
-          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} />
+          <DateTimeFilter date={date} setDate={setDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} t={t} dfLocale={dfLocale} />
           {!validRange && (
             <p className="mb-3 text-xs font-semibold text-destructive">{t("invalidTimeRange")}</p>
           )}
@@ -511,7 +513,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                     <PopoverTrigger asChild>
                       <button className="flex w-full items-center gap-1.5 rounded-lg border border-border bg-background py-2 px-3 text-left text-sm text-foreground hover:border-primary">
                         <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-                        {offerDate ? format(offerDate, "d MMM yyyy") : t("pickADate")}
+                        {offerDate ? format(offerDate, "d MMM yyyy", { locale: dfLocale }) : t("pickADate")}
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -521,6 +523,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                         onSelect={setOfferDate}
                         disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
                         initialFocus
+                        locale={dfLocale}
                         className={cn("p-3 pointer-events-auto")}
                       />
                     </PopoverContent>
@@ -602,15 +605,16 @@ interface DateTimeFilterProps {
   endTime: string;
   setEndTime: (t: string) => void;
   t: (k: string) => string;
+  dfLocale: typeof nl;
 }
 
-const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEndTime, t }: DateTimeFilterProps) => (
+const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEndTime, t, dfLocale }: DateTimeFilterProps) => (
   <div className="mb-4 flex flex-wrap gap-2 text-xs">
     <Popover>
       <PopoverTrigger asChild>
         <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
           <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-          {t("date")}: {date ? format(date, "d MMM") : t("pickADate")}
+          {t("date")}: {date ? format(date, "d MMM", { locale: dfLocale }) : t("pickADate")}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -626,6 +630,7 @@ const DateTimeFilter = ({ date, setDate, startTime, setStartTime, endTime, setEn
                 ? "!bg-transparent !text-foreground"
                 : "",
           }}
+          locale={dfLocale}
           className={cn("p-3 pointer-events-auto")}
         />
       </PopoverContent>
