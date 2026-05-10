@@ -17,6 +17,7 @@ const CommunityFeedbackView = () => {
   const [message, setMessage] = useState("");
   const [category, setCategory] = useState("general");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([
     { id: "1", author: "Jan D.", message: t("feedbackExample1"), date: "06 Apr 2026", likes: 12, category: "facilities" },
     { id: "2", author: "Lisa V.", message: t("feedbackExample2"), date: "05 Apr 2026", likes: 8, category: "energy" },
@@ -59,7 +60,16 @@ const CommunityFeedbackView = () => {
   };
 
   const handleLike = (id: string) => {
-    setFeedbackList(feedbackList.map((f) => (f.id === id ? { ...f, likes: f.likes + 1 } : f)));
+    const isLiked = likedIds.has(id);
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      if (isLiked) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    setFeedbackList((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, likes: f.likes + (isLiked ? -1 : 1) } : f))
+    );
   };
 
   const filteredFeedback = filterCategory === "all"
@@ -156,9 +166,15 @@ const CommunityFeedbackView = () => {
             <p className="mt-2 text-sm text-foreground">{item.message}</p>
             <button
               onClick={() => handleLike(item.id)}
-              className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary"
+              className={`mt-2 flex items-center gap-1 text-xs transition-colors ${
+                likedIds.has(item.id) ? "text-primary" : "text-muted-foreground hover:text-primary"
+              }`}
             >
-              <ThumbsUp className="h-3 w-3" /> {item.likes}
+              <ThumbsUp
+                className="h-3 w-3"
+                fill={likedIds.has(item.id) ? "currentColor" : "none"}
+              />{" "}
+              {item.likes}
             </button>
           </motion.div>
         ))}
