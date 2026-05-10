@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { User, Lock, LogIn, UserPlus, ArrowLeft, Building2 } from "lucide-react";
+import { User, Lock, LogIn, UserPlus, ArrowLeft, Building2, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageToggle from "@/components/LanguageToggle";
+import loginBg from "@/assets/login-bg.jpg";
 
 interface LoginGateProps {
   onLogin: (username: string, isManager: boolean) => void;
