@@ -299,9 +299,9 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
               {topUpOptions.map((amt) => (
                 <button
                   key={amt}
-                  onClick={() => setTopUp(amt)}
+                  onClick={() => { setIsCustomTopUp(false); setTopUp(amt); }}
                   className={`rounded-lg border py-3 text-sm font-bold transition-colors ${
-                    topUp === amt
+                    !isCustomTopUp && topUp === amt
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background text-foreground"
                   }`}
@@ -312,11 +312,61 @@ const TicketshopView = ({ onBack }: TicketshopViewProps) => {
             </div>
 
             <button
-              onClick={initiateTopUp}
-              className="mt-4 w-full rounded-xl bg-primary py-3.5 font-display text-sm font-bold text-primary-foreground"
+              type="button"
+              onClick={() => setIsCustomTopUp(true)}
+              className={`mt-2 w-full rounded-lg border py-3 text-sm font-bold transition-colors ${
+                isCustomTopUp
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-foreground"
+              }`}
             >
-              {t("confirmAndPay")} €{topUp}
+              {t("customAmount")}
             </button>
+
+            {isCustomTopUp && (
+              <div className="mt-3">
+                <label className="mb-1 block text-[11px] font-semibold uppercase text-muted-foreground">
+                  {t("enterAmount")}
+                </label>
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3">
+                  <span className="text-sm font-bold text-foreground">€</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step="1"
+                    inputMode="decimal"
+                    value={customTopUp}
+                    onChange={(e) => setCustomTopUp(e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-transparent py-3 text-sm font-bold text-foreground outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            {(() => {
+              const customNum = parseFloat(customTopUp.replace(",", "."));
+              const effective = isCustomTopUp ? (isFinite(customNum) ? customNum : 0) : topUp;
+              const valid = effective > 0;
+              return (
+                <button
+                  onClick={() => {
+                    if (!valid) return;
+                    setTopUp(effective);
+                    setPending({
+                      type: "topup",
+                      label: `${t("clubConsumptionCard")} — €${effective}`,
+                      amount: effective,
+                      build: () => topUpCard(effective),
+                    });
+                  }}
+                  disabled={!valid}
+                  className="mt-4 w-full rounded-xl bg-primary py-3.5 font-display text-sm font-bold text-primary-foreground disabled:opacity-40"
+                >
+                  {t("confirmAndPay")} €{valid ? effective : 0}
+                </button>
+              );
+            })()}
           </div>
 
           {/* Transaction history (now under Consumption Card) */}
