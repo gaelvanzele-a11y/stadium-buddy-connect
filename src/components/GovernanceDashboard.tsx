@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Users, Zap, Car, Activity, Calendar, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
+import ParkingUsageDetailDialog from "./ParkingUsageDetailDialog";
 
 const GovernanceDashboard = () => {
   const { t } = useLanguage();
+  const [parkingOpen, setParkingOpen] = useState(false);
 
   const kpis = [
     { label: t("kpiRoomOccupancy"), value: "78%", pct: 78, icon: Calendar, color: "text-primary" },
@@ -37,13 +40,19 @@ const GovernanceDashboard = () => {
 
       {/* KPIs */}
       <div className="mb-5 grid grid-cols-2 gap-3">
-        {kpis.map((kpi, i) => (
+        {kpis.map((kpi, i) => {
+          const isParking = kpi.label === t("kpiParkingUsage");
+          return (
           <motion.div
             key={kpi.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06 }}
-            className="rounded-xl bg-card p-4 card-shadow"
+            onClick={isParking ? () => setParkingOpen(true) : undefined}
+            role={isParking ? "button" : undefined}
+            tabIndex={isParking ? 0 : undefined}
+            onKeyDown={isParking ? (e) => { if (e.key === "Enter" || e.key === " ") setParkingOpen(true); } : undefined}
+            className={`rounded-xl bg-card p-4 card-shadow ${isParking ? "cursor-pointer transition-transform hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary" : ""}`}
           >
             <div className="flex items-center gap-1.5">
               <kpi.icon className={`h-3.5 w-3.5 ${kpi.color}`} />
@@ -52,8 +61,11 @@ const GovernanceDashboard = () => {
             <p className="mt-1 font-display text-xl font-extrabold text-foreground">{kpi.value}</p>
             <Progress value={kpi.pct} className="mt-2 h-1.5 bg-secondary [&>div]:bg-primary" />
           </motion.div>
-        ))}
+          );
+        })}
       </div>
+
+      <ParkingUsageDetailDialog open={parkingOpen} onOpenChange={setParkingOpen} />
 
       {/* Stakeholders */}
       <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
