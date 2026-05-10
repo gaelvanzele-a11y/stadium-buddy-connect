@@ -478,7 +478,7 @@ const ParkingMobilityView = ({ onBack, onViewBookings, initialSection }: Parking
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">{ride.seats} {t("rideSeats")}</p>
-                      <p className="text-[11px] font-semibold text-mobility-blue">€3 {t("perRide") }</p>
+                      <p className="text-[11px] font-semibold text-mobility-blue">{ride.price === 0 ? t("free") : `€${ride.price}`}</p>
                       <button
                         onClick={() => handleRequestRide(ride)}
                         className="mt-1 rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
