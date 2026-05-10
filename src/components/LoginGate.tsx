@@ -195,26 +195,29 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
               </button>
 
               <div className="mb-6 text-center">
-                <h1 className="font-display text-2xl font-extrabold leading-tight text-accent">
-                  {t("signIn")}
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent shadow-lg">
+                  <Building2 className="h-7 w-7 text-primary-foreground" />
+                </div>
+                <h1 className="font-display text-2xl font-extrabold leading-tight text-primary-foreground">
+                  {t("loginWelcome")}
                 </h1>
-                <p className="mt-2 text-sm text-muted-foreground">{t("loginSubtitle")}</p>
+                <p className="mt-2 text-sm text-primary-foreground/80">{t("landingTagline")}</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-4 rounded-xl bg-card p-5 card-shadow">
+                <div className="space-y-5 rounded-2xl bg-card/95 p-6 backdrop-blur-md shadow-2xl border border-border/50">
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                    <label className="mb-2 block text-xs font-semibold text-muted-foreground">
                       {t("username")}
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <User className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder={t("usernamePlaceholder")}
-                        className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        className="w-full rounded-xl border border-border bg-background py-3.5 pl-11 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
                         required
                         autoFocus
                       />
@@ -222,19 +225,27 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                    <label className="mb-2 block text-xs font-semibold text-muted-foreground">
                       {t("password")}
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Lock className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder={t("passwordPlaceholder")}
-                        className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        className="w-full rounded-xl border border-border bg-background py-3.5 pl-11 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
                     </div>
                   </div>
 
