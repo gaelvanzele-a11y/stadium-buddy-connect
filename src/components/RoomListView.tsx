@@ -101,7 +101,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
           <PopoverTrigger asChild>
             <button className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 text-foreground hover:border-primary">
               <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-              {t("date")}: {date ? format(date, "d MMM") : t("pickADate")}
+              {t("date")}: {date ? format(date, "d MMM", { locale: dfLocale }) : t("pickADate")}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -117,6 +117,7 @@ const RoomListView = ({ onBack, onSelectRoom }: RoomListViewProps) => {
                     ? "!bg-transparent !text-foreground"
                     : "",
               }}
+              locale={dfLocale}
               className={cn("p-3 pointer-events-auto")}
             />
           </PopoverContent>
