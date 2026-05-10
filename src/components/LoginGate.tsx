@@ -58,6 +58,8 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirm, setRegConfirm] = useState("");
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirm, setShowRegConfirm] = useState(false);
 
   const resetMessages = () => {
     setError("");
@@ -186,13 +188,6 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
                 <ArrowLeft className="h-3.5 w-3.5" />
                 {t("backToWelcome")}
               </button>
-
-              <div className="mb-6 text-center">
-                <h1 className="font-display text-2xl font-extrabold leading-tight text-accent">
-                  {t("loginWelcome")}
-                </h1>
-                <p className="mt-2 text-sm font-medium text-foreground/80">{t("landingTagline")}</p>
-              </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-5 rounded-2xl bg-card p-6 shadow-2xl border border-border/50">
@@ -339,29 +334,49 @@ const LoginGate = ({ onLogin }: LoginGateProps) => {
                     <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
                       {t("password")}
                     </label>
-                    <input
-                      type="password"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder={t("passwordPlaceholder")}
-                      className="w-full rounded-lg border border-border bg-background py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      required
-                      minLength={4}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showRegPassword ? "text" : "password"}
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        placeholder={t("passwordPlaceholder")}
+                        className="w-full rounded-lg border border-border bg-background py-2.5 pl-3 pr-11 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        required
+                        minLength={4}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                        aria-label={showRegPassword ? "Hide password" : "Show password"}
+                      >
+                        {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
                       {t("confirmPassword")}
                     </label>
-                    <input
-                      type="password"
-                      value={regConfirm}
-                      onChange={(e) => setRegConfirm(e.target.value)}
-                      placeholder={t("passwordPlaceholder")}
-                      className="w-full rounded-lg border border-border bg-background py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      required
-                      minLength={4}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showRegConfirm ? "text" : "password"}
+                        value={regConfirm}
+                        onChange={(e) => setRegConfirm(e.target.value)}
+                        placeholder={t("passwordPlaceholder")}
+                        className="w-full rounded-lg border border-border bg-background py-2.5 pl-3 pr-11 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        required
+                        minLength={4}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegConfirm((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                        aria-label={showRegConfirm ? "Hide password" : "Show password"}
+                      >
+                        {showRegConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   {error && (
