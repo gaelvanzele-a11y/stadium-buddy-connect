@@ -230,9 +230,9 @@ const translations = {
     addInvitee: "Add",
     inviteesAdded: "invitees added",
     // Login gate
-    loginWelcome: "Welcome to Mijnstadion",
+    loginWelcome: "Welcome to Stadium Connect Hub",
     loginSubtitle: "Sign in to continue",
-    landingTagline: "Your stadium hub for workspaces, mobility and energy.",
+    landingTagline: "Your access to shared mobility, workspaces and local energy",
     signIn: "Sign In",
     signUp: "Sign Up",
     register: "Register",
@@ -559,9 +559,9 @@ const translations = {
     addInvitee: "Voeg toe",
     inviteesAdded: "genodigden toegevoegd",
     // Login gate
-    loginWelcome: "Welkom bij het Mijnstadion",
+    loginWelcome: "Welkom bij Stadium Connect Hub",
     loginSubtitle: "Log in om verder te gaan",
-    landingTagline: "Jouw stadionhub voor werkplekken, mobiliteit en energie.",
+    landingTagline: "Jouw toegang tot deelmobiliteit, werkplekken en lokale energie",
     signIn: "Inloggen",
     signUp: "Registreren",
     register: "Registreren",
